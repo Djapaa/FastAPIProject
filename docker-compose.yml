@@ -7,7 +7,7 @@ services:
     ports:
       - "${APP_HOST_PORT}:8000"
     volumes:
-      - ./app:/code/app
+      - ./app:/app
     restart: always
     env_file:
       - .env

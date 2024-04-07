@@ -15,5 +15,5 @@ app = FastAPI()
 
 @app.get("/items/")
 async def read_items(session: AsyncSession = Depends(get_async_session)):
-    res = await session.execute(text('select * from test'))
+    res = await session.execute(text('select now()'))
     print(res.scalar())
