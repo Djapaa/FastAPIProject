@@ -1,7 +1,7 @@
 FROM python:3.10
 LABEL authors="esteb"
 
-WORKDIR /src
+WORKDIR /app
 
 
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -23,4 +23,4 @@ USER service-user
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 
-COPY src /src
+COPY app /app

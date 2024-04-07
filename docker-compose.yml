@@ -7,11 +7,11 @@ services:
     ports:
       - "${APP_HOST_PORT}:8000"
     volumes:
-      - ./src:/src
+      - ./app:/code/app
     restart: always
     env_file:
       - .env
-    command: 'python -m uvicorn main:app --host 0.0.0.0'
+    command: 'python -m uvicorn src.main:app --host 0.0.0.0 --reload'
     depends_on:
       - database
 
