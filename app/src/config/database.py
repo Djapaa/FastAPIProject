@@ -1,7 +1,11 @@
 from typing import AsyncGenerator
+
+from sqlalchemy import MetaData, Table, Column, Integer, String, JSON
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from .settings import settings
+
+
 
 # Создание асинхронного движка
 engine = create_async_engine(str(settings.ASYNC_DATABASE_URI),
