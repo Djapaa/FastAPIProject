@@ -22,7 +22,7 @@ class UserCreateSerializer(BaseModel):
     password: Annotated[str, Field(min_length=4, max_length=100)]
 
 
-class UserInfo(BaseModel):
+class UserInfoSerializer(BaseModel):
     id: int
     username: Annotated[str, Field(min_length=4, max_length=100)]
     email: Annotated[EmailStr, Field(min_length=4, max_length=100)]

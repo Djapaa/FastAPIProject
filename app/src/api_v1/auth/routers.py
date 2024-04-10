@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from .models import User
-from .schemas import UserSerializer, UserCreateSerializer, UserInfo
-from .services import user_registration, user_login, get_current_user
+from .schemas import UserSerializer, UserCreateSerializer, UserInfoSerializer, oauth2_scheme
+from .services import user_registration, user_login, get_current_user, user_logout
 from ...config.database import get_async_session
 
 router = APIRouter()
@@ -23,12 +23,11 @@ async def signup(user: UserCreateSerializer, session: Annotated[AsyncSession, De
     return Response(status_code=status.HTTP_201_CREATED)
 
 
-@router.post('/login')
+@router.post('/login', status_code=200)
 async def login(
         session: Annotated[AsyncSession, Depends(get_async_session)],
         user_form: OAuth2PasswordRequestForm = Depends()
 ):
-
     token = await user_login(user_form, session)
     return JSONResponse(
         content={"access_token": token},
@@ -36,13 +35,15 @@ async def login(
     )
 
 
-@router.post('/logout/')
-async def logout(
-        session: Annotated[AsyncSession, Depends(get_async_session)],
-):
-    pass
+@router.post('/logout/', status_code=204)
+async def logout(session: Annotated[AsyncSession, Depends(get_async_session)],
+                 current_user: Annotated[UserInfoSerializer, Depends(get_current_user)],
+                 token: Annotated[str, Depends(oauth2_scheme)]
+                 ):
+    await user_logout(session, token)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/current", response_model=UserInfo)
-async def read_users_me(current_user: Annotated[UserInfo, Depends(get_current_user)]):
+@router.get("/current", response_model=UserInfoSerializer)
+async def read_users_me(current_user: Annotated[UserInfoSerializer, Depends(get_current_user)]):
     return current_user

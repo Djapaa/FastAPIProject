@@ -5,18 +5,22 @@ from fastapi import HTTPException, Depends
 import secrets
 
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, delete
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from .models import User, Token
-from .schemas import UserSerializer, UserCreateSerializer, oauth2_scheme, UserInfo
+from .schemas import UserSerializer, UserCreateSerializer, oauth2_scheme, UserInfoSerializer
 from passlib.context import CryptContext
 
 from ...config.database import get_async_session
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def to_pydantic(db_object, pydantic_model):
+    return pydantic_model(**db_object.__dict__)
 
 
 async def get_user_by_username_or_email(username: str, session: AsyncSession, email: str | None = None):
@@ -80,7 +84,7 @@ def get_token():
     return secrets.token_hex(32)
 
 
-async def user_login(user_form: OAuth2PasswordRequestForm, session: AsyncSession,):
+async def user_login(user_form: OAuth2PasswordRequestForm, session: AsyncSession, ):
     user = await get_user_by_username_or_email(user_form.username, session)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
@@ -98,8 +102,14 @@ async def user_login(user_form: OAuth2PasswordRequestForm, session: AsyncSession
     return token
 
 
-def to_pydantic(db_object, pydantic_model):
-    return pydantic_model(**db_object.__dict__)
+async def user_logout(session: AsyncSession,
+                      token: Annotated[str, Depends(oauth2_scheme)]):
+    stmt = (
+        delete(Token)
+        .filter(Token.access_token == token)
+    )
+    await session.execute(stmt)
+    await session.commit()
 
 
 async def get_current_user(session: Annotated[AsyncSession, Depends(get_async_session)],
