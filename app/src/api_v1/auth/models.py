@@ -4,8 +4,8 @@ from datetime import datetime
 from pydantic import EmailStr, Field
 from sqlalchemy import String, Numeric, text, Column, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from ...config.model import Model
 
-from app.src.config.model import Model
 
 
 class GenderEnum(str, enum.Enum):
@@ -18,7 +18,7 @@ class User(Model):
     __tablename__ = 'user'
 
     username: Mapped[str] = mapped_column(String(100), unique=True)
-    email: Mapped[EmailStr] = Field(sa_column=Column(String, unique=True))
+    email: Mapped[str] = mapped_column(String(100), unique=True)
     is_stuff: Mapped[bool] = mapped_column(default=False)
     is_active: Mapped[bool] = mapped_column(default=True)
     is_superuser: Mapped[bool] = mapped_column(default=False)
@@ -37,12 +37,14 @@ class User(Model):
 
     hashed_password: Mapped[str]
 
-    tokens: Mapped[list['Token']] = relationship(back_populates="tokens")
+    tokens: Mapped[list['Token']] = relationship(back_populates="user")
 
 class Token(Model):
     __tablename__ = 'token'
 
-    access_token: Mapped[str] = mapped_column(unique=True, index=True)
+    access_token: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
 
-    user: Mapped['User'] = relationship(back_populates="user")
+    expire_date: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now()) + INTERVAL '14 day'"))
+
+    user: Mapped['User'] = relationship(back_populates="tokens")

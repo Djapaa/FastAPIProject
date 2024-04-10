@@ -1,90 +1,48 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, Depends, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+
+from .models import User
+from .schemas import UserSerializer, UserCreateSerializer, UserInfo
+from .services import user_registration, user_login, get_current_user
+from ...config.database import get_async_session
 
 router = APIRouter()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-@router.get('/test/')
-async def read_users_me():
-    return 1
+@router.post('/signup/', status_code=201)
+async def signup(user: UserCreateSerializer, session: Annotated[AsyncSession, Depends(get_async_session)]):
+    """
+        Регистрация пользователя
+    """
+    await user_registration(user, session)
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
-class User(BaseModel):
-    username: str
-    email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
+@router.post('/login')
+async def login(
+        session: Annotated[AsyncSession, Depends(get_async_session)],
+        user_form: OAuth2PasswordRequestForm = Depends()
+):
 
-fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        "full_name": "John Doe",
-        "email": "johndoe@example.com",
-        "hashed_password": "fakehashedsecret",
-        "disabled": False,
-    },
-    "alice": {
-        "username": "alice",
-        "full_name": "Alice Wonderson",
-        "email": "alice@example.com",
-        "hashed_password": "fakehashedsecret2",
-        "disabled": True,
-    },
-}
-
-def fake_hash_password(password: str):
-    return "fakehashed" + password
-
-class UserInDB(User):
-    hashed_password: str
-
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
-        return UserInDB(**user_dict)
-
-def fake_decode_token(token):
-    # This doesn't provide any security at all
-    # Check the next version
-    user = get_user(fake_users_db, token)
-    return user
-
-def fake_decode_token(token):
-    return User(
-        username=token + "fakedecoded", email="john@example.com", full_name="John Doe"
+    token = await user_login(user_form, session)
+    return JSONResponse(
+        content={"access_token": token},
+        status_code=status.HTTP_200_OK
     )
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    user = fake_decode_token(token)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return user
-
-#
-@router.post("/token/")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    user_dict = fake_users_db.get(form_data.username)
-    if not user_dict:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-
-    user = UserInDB(**user_dict)
-    hashed_password = fake_hash_password(form_data.password)
-    if not hashed_password == user.hashed_password:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-
-    return {"access_token": user.username, "token_type": "bearer"}
+@router.post('/logout/')
+async def logout(
+        session: Annotated[AsyncSession, Depends(get_async_session)],
+):
+    pass
 
 
-@router.get("/current/")
-async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
+@router.get("/current", response_model=UserInfo)
+async def read_users_me(current_user: Annotated[UserInfo, Depends(get_current_user)]):
     return current_user
