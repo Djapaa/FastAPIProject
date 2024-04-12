@@ -52,5 +52,16 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str
     CELERY_RESULT_BACKEND: str
 
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: str
+    MAIL_PORT: int
+    MAIL_HOST: str
+    MAIL_STARTTLS: bool
+    MAIL_SSL_TLS: bool
+
+
+    DOMAIN_NAME: str
+
 
 settings = Settings()
