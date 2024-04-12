@@ -12,7 +12,7 @@ from app.src.config.model import Model
 from app.src.config.settings import settings
 
 from app.src.api_v1.auth.models import User, Token
-# from app.src.api_v1.composition.models import Composition
+from app.src.api_v1.composition.models import *
 
 
 

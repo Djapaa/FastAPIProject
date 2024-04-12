@@ -4,8 +4,8 @@ from datetime import datetime
 from pydantic import EmailStr, Field
 from sqlalchemy import String, Numeric, text, Column, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from ...config.model import Model
 
+from ...config.model import Model
 
 
 class GenderEnum(str, enum.Enum):
@@ -38,6 +38,11 @@ class User(Model):
     hashed_password: Mapped[str]
 
     tokens: Mapped[list['Token']] = relationship(back_populates="user")
+
+    bookmarks_and_ratings: Mapped[list["CompositionGenreRelation"]] = relationship(back_populates='readers',
+                                                                                   secondary='user_composition_relation'
+                                                                                   )
+
 
 class Token(Model):
     __tablename__ = 'token'
