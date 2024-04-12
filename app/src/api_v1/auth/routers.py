@@ -5,7 +5,10 @@ from fastapi import APIRouter, HTTPException, Depends, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+from ...config.celery_conf import debug_task
+from ...config.settings import settings
 
+from .tasks import task_2
 from .models import User
 from .schemas import UserSerializer, UserCreateSerializer, UserInfoSerializer, oauth2_scheme
 from .services import user_registration, user_login, get_current_user, user_logout
@@ -47,3 +50,8 @@ async def logout(session: Annotated[AsyncSession, Depends(get_async_session)],
 @router.get("/current", response_model=UserInfoSerializer)
 async def read_users_me(current_user: Annotated[UserInfoSerializer, Depends(get_current_user)]):
     return current_user
+
+@router.get('/test')
+def test():
+    task_2.delay()
+    return 1

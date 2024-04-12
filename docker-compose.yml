@@ -29,3 +29,47 @@ services:
       - POSTGRES_PASSWORD=${DB_PASS}
     volumes:
       - ~/pgdata2:/var/lib/postgresql/data
+
+
+  worker:
+    container_name: celery-worker
+    build: .
+    volumes:
+      - ./app:/app
+    restart: always
+    env_file:
+      - .env
+    command: python -m celery -A src.config.celery_conf.celery worker --loglevel=info
+    depends_on:
+      - database
+      - redis
+
+  flower:
+    build:
+      context: .
+    hostname: flower
+    command: python -m celery -A src.config.celery_conf.celery flower
+
+    volumes:
+      - ./app:/app
+
+    ports:
+      - "5555:5555"
+
+    env_file:
+      - .env
+
+    depends_on:
+      - database
+      - redis
+      - web-app
+
+
+
+  redis:
+    image: redis:7.0.5-alpine
+    container_name: redis-fast-api
+    ports:
+      - "16379:6379"
+    command:
+      - 'redis-server'

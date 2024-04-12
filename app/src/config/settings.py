@@ -49,5 +49,8 @@ class Settings(BaseSettings):
                 )
         return v
 
+    CELERY_BROKER_URL: str
+    CELERY_RESULT_BACKEND: str
+
 
 settings = Settings()
