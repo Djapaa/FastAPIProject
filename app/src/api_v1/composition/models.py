@@ -4,10 +4,11 @@ from datetime import datetime
 from sqlalchemy import String, text, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ...config.model import Model
-
+# from ..auth.models import User
 
 class Composition(Model):
     __tablename__ = 'composition'
+
     slug: Mapped[str] = mapped_column(String(200), unique=True)
     title: Mapped[str] = mapped_column(String(255))
     english_title: Mapped[str] = mapped_column(String(255))
@@ -38,7 +39,7 @@ class Composition(Model):
                                                                         secondary='composition_genre_relation'
                                                                         )
 
-    composition_tags: Mapped[list["CompositionGenre"]] = relationship(back_populates='tag_compositions',
+    composition_tags: Mapped[list["CompositionTag"]] = relationship(back_populates='tag_compositions',
                                                                       secondary='composition_tag_relation'
                                                                       )
 
