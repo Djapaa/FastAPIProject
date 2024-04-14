@@ -1,9 +1,11 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import String, text, ForeignKey, Numeric
+from sqlalchemy import String, text, ForeignKey, Numeric, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ...config.model import Model
+
+
 # from ..auth.models import User
 
 class Composition(Model):
@@ -12,7 +14,7 @@ class Composition(Model):
     slug: Mapped[str] = mapped_column(String(200), unique=True)
     title: Mapped[str] = mapped_column(String(255))
     english_title: Mapped[str] = mapped_column(String(255))
-    another_name_title: Mapped[str] = mapped_column(String(500))
+    another_name_title: Mapped[str] = mapped_column(String(500), nullable=True)
     year_of_creations: Mapped[int] = mapped_column(default=1980)
 
     created_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
@@ -40,8 +42,8 @@ class Composition(Model):
                                                                         )
 
     composition_tags: Mapped[list["CompositionTag"]] = relationship(back_populates='tag_compositions',
-                                                                      secondary='composition_tag_relation'
-                                                                      )
+                                                                    secondary='composition_tag_relation'
+                                                                    )
 
     readers: Mapped[list["User"]] = relationship(back_populates='bookmarks_and_ratings',
                                                  secondary='user_composition_relation'
@@ -71,9 +73,9 @@ class CompositionStatus(Model):
 
 class CompositionGenreRelation(Model):
     __tablename__ = 'composition_genre_relation'
-
-    composition_id: Mapped[int] = mapped_column(ForeignKey("composition.id"), primary_key=True)
-    genre_id: Mapped[int] = mapped_column(ForeignKey("composition_genre.id"), primary_key=True)
+    __table_args__ = (UniqueConstraint('composition_id', 'genre_id', name='uq_composition_genre_ids'),)
+    composition_id: Mapped[int] = mapped_column(ForeignKey("composition.id"))
+    genre_id: Mapped[int] = mapped_column(ForeignKey("composition_genre.id"))
 
 
 class CompositionGenre(Model):
@@ -87,9 +89,9 @@ class CompositionGenre(Model):
 
 class CompositionTagRelation(Model):
     __tablename__ = 'composition_tag_relation'
-
-    composition_id: Mapped[int] = mapped_column(ForeignKey("composition.id"), primary_key=True)
-    tag_id: Mapped[int] = mapped_column(ForeignKey("composition_tag.id"), primary_key=True)
+    __table_args__ = (UniqueConstraint('composition_id', 'tag_id', name='uq_composition_tag_ids'),)
+    composition_id: Mapped[int] = mapped_column(ForeignKey("composition.id"))
+    tag_id: Mapped[int] = mapped_column(ForeignKey("composition_tag.id"))
 
 
 class CompositionTag(Model):

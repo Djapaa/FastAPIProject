@@ -1,8 +1,8 @@
-"""add-composition-and-auxiliary-table
+"""init
 
-Revision ID: 78aea53b87c4
-Revises: 8fc799c17b26
-Create Date: 2024-04-12 18:38:57.314374
+Revision ID: 4230a75e3914
+Revises: 
+Create Date: 2024-04-14 13:20:44.444885
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '78aea53b87c4'
-down_revision: Union[str, None] = '8fc799c17b26'
+revision: str = '4230a75e3914'
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -45,11 +45,31 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('user',
+    sa.Column('username', sa.String(length=100), nullable=False),
+    sa.Column('email', sa.String(length=100), nullable=False),
+    sa.Column('is_stuff', sa.Boolean(), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('is_superuser', sa.Boolean(), nullable=False),
+    sa.Column('is_verified', sa.Boolean(), nullable=False),
+    sa.Column('balance', sa.Numeric(precision=6, scale=2), nullable=False),
+    sa.Column('descriptions', sa.String(length=500), nullable=True),
+    sa.Column('gender', sa.Enum('female', 'male', 'not_specified', name='genderenum'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
+    sa.Column('email_not', sa.Boolean(), nullable=False),
+    sa.Column('avatar', sa.String(), nullable=False),
+    sa.Column('hashed_password', sa.String(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email'),
+    sa.UniqueConstraint('username')
+    )
     op.create_table('composition',
     sa.Column('slug', sa.String(length=200), nullable=False),
     sa.Column('title', sa.String(length=255), nullable=False),
     sa.Column('english_title', sa.String(length=255), nullable=False),
-    sa.Column('another_name_title', sa.String(length=500), nullable=False),
+    sa.Column('another_name_title', sa.String(length=500), nullable=True),
     sa.Column('year_of_creations', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
@@ -70,13 +90,23 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('slug')
     )
+    op.create_table('token',
+    sa.Column('access_token', sa.String(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('expire_date', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now()) + INTERVAL '14 day'"), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_token_access_token'), 'token', ['access_token'], unique=True)
     op.create_table('composition_genre_relation',
     sa.Column('composition_id', sa.Integer(), nullable=False),
     sa.Column('genre_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['composition_id'], ['composition.id'], ),
     sa.ForeignKeyConstraint(['genre_id'], ['composition_genre.id'], ),
-    sa.PrimaryKeyConstraint('composition_id', 'genre_id', 'id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('composition_id', 'genre_id', name='uq_composition_genre_ids')
     )
     op.create_table('composition_tag_relation',
     sa.Column('composition_id', sa.Integer(), nullable=False),
@@ -84,7 +114,8 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['composition_id'], ['composition.id'], ),
     sa.ForeignKeyConstraint(['tag_id'], ['composition_tag.id'], ),
-    sa.PrimaryKeyConstraint('composition_id', 'tag_id', 'id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('composition_id', 'tag_id', name='uq_composition_tag_ids')
     )
     op.create_table('user_composition_relation',
     sa.Column('composition_id', sa.Integer(), nullable=False),
@@ -104,7 +135,10 @@ def downgrade() -> None:
     op.drop_table('user_composition_relation')
     op.drop_table('composition_tag_relation')
     op.drop_table('composition_genre_relation')
+    op.drop_index(op.f('ix_token_access_token'), table_name='token')
+    op.drop_table('token')
     op.drop_table('composition')
+    op.drop_table('user')
     op.drop_table('composition_type')
     op.drop_table('composition_tag')
     op.drop_table('composition_status')

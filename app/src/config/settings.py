@@ -18,7 +18,6 @@ from pydantic_settings import BaseSettings
 
 load_dotenv()
 
-db_name = os.getenv("DB_NAME")
 
 
 class Settings(BaseSettings):
@@ -62,6 +61,9 @@ class Settings(BaseSettings):
 
 
     DOMAIN_NAME: str
+
+    MEDIA_ROOT: str
+    MEDIA_URL: str
 
 
 settings = Settings()
