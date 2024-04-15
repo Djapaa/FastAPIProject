@@ -24,6 +24,7 @@ email_validator==2.1.1
 exceptiongroup==1.2.0
 fastapi==0.110.1
 fastapi-admin==1.0.4
+fastapi-filter==1.1.0
 fastapi-mail==1.4.1
 flower==2.0.1
 greenlet==3.0.3

@@ -4,13 +4,16 @@ from fastapi import HTTPException, UploadFile
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload, contains_eager, load_only
 from starlette import status
 from typing import Type
 
-from .schemas import CompositionCreateSerializer
-from .models import Composition, CompositionGenre, CompositionTag, CompositionStatus, CompositionType, CompositionsAgeRating
+from .schemas import CompositionCreateSerializer, CompositionDetailSerializer, Paginator
+from .models import Composition, CompositionGenre, CompositionTag, CompositionStatus, CompositionType, \
+    CompositionsAgeRating
 from ...config.model import Model
 from ...config.settings import settings
+
 
 async def upload_image(image: UploadFile, upload_subdir: str | None = None):
     if image.content_type not in ["image/jpeg", "image/png", "image/jpg"]:
@@ -36,8 +39,7 @@ async def check_obj_in_db(session: AsyncSession, obj_id: int, model: Type['Model
         select(model)
         .filter(model.id == obj_id)
     )
-    obj = await session.execute(query)
-    obj = obj.scalar()
+    obj = await session.scalar(query)
     if obj is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail={
@@ -46,7 +48,7 @@ async def check_obj_in_db(session: AsyncSession, obj_id: int, model: Type['Model
     return obj
 
 
-async def create(
+async def create_new_composition(
         composition: CompositionCreateSerializer,
         session: AsyncSession,
         image: UploadFile
@@ -84,3 +86,50 @@ async def create(
     await session.commit()
 
 
+async def get_composition_by_id(composition_id: int, session: AsyncSession):
+    query = (
+        select(Composition)
+        .options(
+            joinedload(Composition.status),
+            joinedload(Composition.type),
+            joinedload(Composition.age_rating),
+            selectinload(Composition.composition_genres),
+            selectinload(Composition.composition_tags)
+        )
+        .filter(Composition.id == composition_id)
+
+    )
+    composition = await session.scalar(query)
+    if not composition:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f'Composition with {composition_id=}, not found')
+    return composition
+
+
+async def get_all_composition(session: AsyncSession, paginator: Paginator):
+    query = (
+        select(
+            Composition
+        )
+        .options(
+            load_only(
+                Composition.id,
+                Composition.title,
+                Composition.composition_image,
+                Composition.avg_rating,
+            ),
+            joinedload(Composition.type)
+        ).offset(paginator.offset).limit(paginator.page_size)
+    )
+    compositions = await session.scalars(query)
+    return compositions
+
+
+async def get_composition_detail(composition_id: int, session: AsyncSession):
+    res = await get_composition_by_id(composition_id, session)
+    return CompositionDetailSerializer.model_validate(res, from_attributes=True)
+
+
+async def get_composition_list(session: AsyncSession, paginator: Paginator):
+    res = await get_all_composition(session, paginator)
+    return res.all()
