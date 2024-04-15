@@ -90,6 +90,7 @@ class CompositionGenre(Model):
 class CompositionTagRelation(Model):
     __tablename__ = 'composition_tag_relation'
     __table_args__ = (UniqueConstraint('composition_id', 'tag_id', name='uq_composition_tag_ids'),)
+
     composition_id: Mapped[int] = mapped_column(ForeignKey("composition.id"))
     tag_id: Mapped[int] = mapped_column(ForeignKey("composition_tag.id"))
 

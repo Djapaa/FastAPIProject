@@ -91,7 +91,7 @@ class CompositionDetailSerializer(BaseModel):
 
 
 class Paginator(BaseModel):
-    page: Annotated[int, Field(ge=1, default=0)]
+    page: Annotated[int, Field(ge=1, default=1)]
     page_size: Annotated[int, Field(ge=1, le=100, default=20)]
 
     @computed_field

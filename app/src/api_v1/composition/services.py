@@ -1,6 +1,7 @@
 import os
 import aiofiles
 from fastapi import HTTPException, UploadFile
+from fastapi_filter.contrib.sqlalchemy import Filter
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +9,7 @@ from sqlalchemy.orm import joinedload, selectinload, contains_eager, load_only
 from starlette import status
 from typing import Type
 
-from .schemas import CompositionCreateSerializer, CompositionDetailSerializer, Paginator
+from .schemas import CompositionCreateSerializer, CompositionDetailSerializer, Paginator, CompositionListSerializer
 from .models import Composition, CompositionGenre, CompositionTag, CompositionStatus, CompositionType, \
     CompositionsAgeRating
 from ...config.model import Model
@@ -106,30 +107,33 @@ async def get_composition_by_id(composition_id: int, session: AsyncSession):
     return composition
 
 
-async def get_all_composition(session: AsyncSession, paginator: Paginator):
+async def get_all_composition(session: AsyncSession, paginator: Paginator, filter: Filter):
+    print(filter.ordering_values)
+
     query = (
-        select(
-            Composition
-        )
-        .options(
-            load_only(
-                Composition.id,
-                Composition.title,
-                Composition.composition_image,
-                Composition.avg_rating,
-            ),
-            joinedload(Composition.type)
-        ).offset(paginator.offset).limit(paginator.page_size)
+        select(Composition)
+        .distinct()
+        .join(Composition.composition_tags)
+        .join(Composition.type)
+        .join(Composition.status)
+        .join(Composition.age_rating)
+        .join(Composition.composition_genres)
+        .options(contains_eager(Composition.type))
+        .offset(paginator.offset)
+        .limit(paginator.page_size)
     )
-    compositions = await session.scalars(query)
-    return compositions
+
+    query = filter.filter(query)
+    query = filter.sort(query)
+    compositions = await session.execute(query)
+    return compositions.scalars().all()
 
 
 async def get_composition_detail(composition_id: int, session: AsyncSession):
-    res = await get_composition_by_id(composition_id, session)
-    return CompositionDetailSerializer.model_validate(res, from_attributes=True)
+    composition = await get_composition_by_id(composition_id, session)
+    return CompositionDetailSerializer.model_validate(composition, from_attributes=True)
 
 
-async def get_composition_list(session: AsyncSession, paginator: Paginator):
-    res = await get_all_composition(session, paginator)
-    return res.all()
+async def get_composition_list(session: AsyncSession, paginator: Paginator, composition_filter):
+    compositions = await get_all_composition(session, paginator, composition_filter)
+    return [CompositionListSerializer.model_validate(composition, from_attributes=True) for composition in compositions]
