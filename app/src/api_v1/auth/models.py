@@ -4,9 +4,13 @@ from datetime import datetime
 from pydantic import EmailStr, Field
 from sqlalchemy import String, Numeric, text, Column, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from typing import TYPE_CHECKING
 from ...config.model import Model
-from ..composition.models import Composition
+
+
+if TYPE_CHECKING:
+    from ..composition.models import Composition
+
 
 class GenderEnum(str, enum.Enum):
     female = "female"
@@ -39,7 +43,7 @@ class User(Model):
 
     tokens: Mapped[list['Token']] = relationship(back_populates="user")
 
-    bookmarks_and_ratings: Mapped[list["Composition"]] = relationship(back_populates='readers',
+    evaluated_and_bookmark_compositions: Mapped[list["Composition"]] = relationship(back_populates='readers',
                                                                                    secondary='user_composition_relation'
                                                                                    )
 

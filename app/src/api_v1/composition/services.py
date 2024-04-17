@@ -1,17 +1,18 @@
 import os
+from typing import Type
+
 import aiofiles
 from fastapi import HTTPException, UploadFile
 from fastapi_filter.contrib.sqlalchemy import Filter
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload, contains_eager, load_only
+from sqlalchemy.orm import joinedload, selectinload, contains_eager
 from starlette import status
-from typing import Type
 
-from .schemas import CompositionCreateSerializer, CompositionDetailSerializer, Paginator, CompositionListSerializer, CompositionUpdateSerializer
 from .models import Composition, CompositionGenre, CompositionTag, CompositionStatus, CompositionType, \
-    CompositionsAgeRating
+    CompositionsAgeRating, UserCompositionRelation
+from .schemas import CompositionCreateSerializer, CompositionDetailSerializer, Paginator, CompositionListSerializer, \
+    CompositionUpdateSerializer, RatingSerializer, BookmarkSerializer
 from ...config.model import Model
 from ...config.settings import settings
 
@@ -104,7 +105,6 @@ async def get_composition_by_id(composition_id: int, session: AsyncSession) -> C
 
 
 async def get_all_composition(session: AsyncSession, paginator: Paginator, filter: Filter):
-
     query = (
         select(Composition)
         .distinct()
@@ -139,7 +139,6 @@ async def partial_update_composition(composition_id: int,
                                      composition: CompositionUpdateSerializer):
     composition_obj = await get_composition_by_id(composition_id, session)
 
-
     composition_obj.title = composition.title or composition_obj.title
     composition_obj.slug = composition.slug or composition_obj.slug
     composition_obj.english_title = composition.english_title or composition_obj.english_title
@@ -171,3 +170,65 @@ async def partial_update_composition(composition_id: int,
     session.add(composition_obj)
     await session.commit()
     return CompositionDetailSerializer.model_validate(composition_obj, from_attributes=True)
+
+
+async def get_or_create(session: AsyncSession, model, defaults=None, **kwargs):
+    instance = await session.execute(select(model).filter_by(**kwargs))
+    instance = instance.scalar_one_or_none()
+    if instance:
+        return instance, False
+    else:
+        kwargs |= defaults or {}
+        instance = model(**kwargs)
+
+        try:
+            session.add(instance)
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            instance = await session.execute(select(model).filter_by(**kwargs))
+            instance = instance.scalar_one()
+            return instance, False
+        else:
+            return instance, True
+
+
+async def user_composition_relation_add(
+        composition_id: int,
+        user_id: int,
+        session: AsyncSession,
+        vote: int,
+        vote_field_name: str
+):
+    await get_composition_by_id(composition_id, session)
+    instance, _ = await get_or_create(
+        session,
+        UserCompositionRelation,
+        user_id=user_id,
+        composition_id=composition_id
+    )
+    if not hasattr(instance, vote_field_name):
+        raise AttributeError(f'attribute {vote_field_name}, does not exists')
+
+    setattr(instance, vote_field_name, vote)
+    session.add(instance)
+    await session.commit()
+    return instance
+
+
+async def rating_add(
+        composition_id: int,
+        user_id: int,
+        session: AsyncSession,
+        vote: int
+):
+    return await user_composition_relation_add(composition_id, user_id, session, vote, 'rating')
+
+
+async def bookmark_add(
+        composition_id: int,
+        user_id: int,
+        session: AsyncSession,
+        vote: int
+):
+    return await user_composition_relation_add(composition_id, user_id, session, vote, 'bookmark')

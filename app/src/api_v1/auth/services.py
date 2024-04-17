@@ -5,23 +5,21 @@ import uuid
 from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import EmailStr
-from sqlalchemy import select, or_, delete, update, Result
+from sqlalchemy import select, or_, delete, Result
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from fastapi import HTTPException, Depends
 from passlib.context import CryptContext
 
 from .models import User, Token
-from .schemas import UserCreateSerializer, oauth2_scheme, UserInfoSerializer
+from .schemas import UserCreateSerializer, oauth2_scheme
 from .tasks import send_verification_mail
 from ...config.database import get_async_session
 from ...config.redis_conf import redis
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
-def to_pydantic(db_object, pydantic_model):
-    return pydantic_model(**db_object.__dict__)
 
 
 async def get_user_by_username_or_email(username: str, session: AsyncSession,
@@ -46,6 +44,8 @@ async def get_user_by_username_or_email(username: str, session: AsyncSession,
     return res.mappings().one_or_none()
 
 
+
+
 async def get_user_by_token(token: str, session: AsyncSession):
     subq = (
         select(Token)
@@ -56,6 +56,9 @@ async def get_user_by_token(token: str, session: AsyncSession):
     )
     query = (
         select(User)
+        .options(
+            selectinload(User.evaluated_and_bookmark_compositions)
+        )
         .filter(User.id == subq.c.user_id)
     )
     res = await session.execute(query)

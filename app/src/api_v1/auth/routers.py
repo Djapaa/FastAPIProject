@@ -35,9 +35,8 @@ async def login(
     )
 
 
-@router.post('/logout/', status_code=204)
+@router.post('/logout/', status_code=204, dependencies=[Depends(get_current_user)])
 async def logout(session: Annotated[AsyncSession, Depends(get_async_session)],
-                 current_user: Annotated[UserInfoSerializer, Depends(get_current_user)],
                  token: Annotated[str, Depends(oauth2_scheme)]
                  ):
     await user_logout(session, token)

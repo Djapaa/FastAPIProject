@@ -117,3 +117,9 @@ class Paginator(BaseModel):
     @property
     def offset(self) -> int:
         return (self.page - 1) * self.page_size
+
+class RatingSerializer(BaseModel):
+    vote: Annotated[Optional[int], Field(ge=1, le=10, default=None)]
+
+class BookmarkSerializer(BaseModel):
+    vote: Annotated[Optional[int], Field(ge=1, le=6, default=None)]

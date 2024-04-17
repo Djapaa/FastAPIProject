@@ -1,12 +1,13 @@
-import enum
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import String, text, ForeignKey, Numeric, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ...config.model import Model
 
+from ..chapter.models import Chapter
+from ..auth.models import User
 
-# from ..auth.models import User
 
 class Composition(Model):
     __tablename__ = 'composition'
@@ -37,17 +38,23 @@ class Composition(Model):
     status_id: Mapped[int] = mapped_column(ForeignKey('composition_status.id'))
     status: Mapped['CompositionStatus'] = relationship(back_populates='composition')
 
-    composition_genres: Mapped[list["CompositionGenre"]] = relationship(back_populates='genre_compositions',
+    composition_genres: Mapped[list['CompositionGenre']] = relationship(back_populates='genre_compositions',
                                                                         secondary='composition_genre_relation'
                                                                         )
 
-    composition_tags: Mapped[list["CompositionTag"]] = relationship(back_populates='tag_compositions',
+    composition_tags: Mapped[list['CompositionTag']] = relationship(back_populates='tag_compositions',
                                                                     secondary='composition_tag_relation'
                                                                     )
 
-    readers: Mapped[list["User"]] = relationship(back_populates='bookmarks_and_ratings',
+    readers: Mapped[list['User']] = relationship(back_populates='evaluated_and_bookmark_compositions',
                                                  secondary='user_composition_relation'
                                                  )
+
+    chapters: Mapped[list['Chapter']] = relationship(back_populates='composition')
+
+
+
+
 
 
 class CompositionsAgeRating(Model):
@@ -104,32 +111,13 @@ class CompositionTag(Model):
                                                                  )
 
 
-class BookmarkEnum(enum.Enum):
-    READING = 1
-    WILL_READ = 2
-    READED = 3
-    ABANDONED = 4
-    POSTPONED = 5
-
-
-class RatingEnum(enum.Enum):
-    TEN = 10
-    NINE = 9
-    EIGHT = 8
-    SEVEN = 7
-    SIX = 6
-    FIVE = 5
-    FOUR = 4
-    THREE = 3
-    TWO = 2
-    ONE = 1
-
 
 class UserCompositionRelation(Model):
     __tablename__ = 'user_composition_relation'
+    __table_args__ = (UniqueConstraint('composition_id', 'user_id', name='uq_user_composition_relation'),)
 
-    composition_id: Mapped[int] = mapped_column(ForeignKey("composition.id"), primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key=True)
+    composition_id: Mapped[int] = mapped_column(ForeignKey("composition.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
-    bookmark: Mapped[BookmarkEnum] = mapped_column(nullable=True)
-    rating: Mapped[RatingEnum] = mapped_column(nullable=True)
+    bookmark: Mapped[int] = mapped_column(nullable=True)
+    rating: Mapped[int] = mapped_column(nullable=True)

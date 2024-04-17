@@ -6,11 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from .services import create_new_composition, get_composition_detail, get_composition_list, partial_update_composition, \
-    get_composition_by_id
+    rating_add, bookmark_add
+from ..auth.schemas import UserInfoSerializer
+from ..auth.services import get_current_user
 from ...config.database import get_async_session
-from .schemas import CompositionCreateSerializer, Paginator, CompositionUpdateSerializer
+from .schemas import CompositionCreateSerializer, Paginator, CompositionUpdateSerializer, RatingSerializer, \
+    BookmarkSerializer
 from .filters import CompositionFilter
-from .models import Composition
 
 router = APIRouter()
 
@@ -47,3 +49,22 @@ async def update_composition(
 
 ):
     return await partial_update_composition(id, session, composition)
+
+
+@router.post('/{id}/rating/')
+async def composition_rating_add_or_update(id: int,
+                                           current_user: Annotated[UserInfoSerializer, Depends(get_current_user)],
+                                           session: Annotated[AsyncSession, Depends(get_async_session)],
+                                           rating: RatingSerializer,
+                                           ):
+    return await rating_add(id, current_user.id, session, rating.vote)
+
+
+@router.post('/{id}/bookmark/')
+async def composition_bookmark_add_or_update(id: int,
+                                             current_user: Annotated[UserInfoSerializer, Depends(get_current_user)],
+                                             session: Annotated[AsyncSession, Depends(get_async_session)],
+                                             bookmark: BookmarkSerializer,
+                                             ):
+    return await bookmark_add(id, current_user.id, session, bookmark.vote)
+
