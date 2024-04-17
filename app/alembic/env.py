@@ -14,8 +14,6 @@ from app.src.config.settings import settings
 from app.src.api_v1.auth.models import User, Token
 from app.src.api_v1.composition.models import *
 
-
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

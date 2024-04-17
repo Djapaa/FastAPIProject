@@ -9,7 +9,7 @@ from sqlalchemy.orm import joinedload, selectinload, contains_eager, load_only
 from starlette import status
 from typing import Type
 
-from .schemas import CompositionCreateSerializer, CompositionDetailSerializer, Paginator, CompositionListSerializer
+from .schemas import CompositionCreateSerializer, CompositionDetailSerializer, Paginator, CompositionListSerializer, CompositionUpdateSerializer
 from .models import Composition, CompositionGenre, CompositionTag, CompositionStatus, CompositionType, \
     CompositionsAgeRating
 from ...config.model import Model
@@ -52,13 +52,9 @@ async def check_obj_in_db(session: AsyncSession, obj_id: int, model: Type['Model
 async def create_new_composition(
         composition: CompositionCreateSerializer,
         session: AsyncSession,
-        image: UploadFile
 ):
-    composition_image = await upload_image(image, 'composition')
-
     composition_obj = Composition()
 
-    composition_obj.composition_image = composition_image
     composition_obj.title = composition.title
     composition_obj.slug = composition.slug
     composition_obj.english_title = composition.english_title
@@ -87,7 +83,7 @@ async def create_new_composition(
     await session.commit()
 
 
-async def get_composition_by_id(composition_id: int, session: AsyncSession):
+async def get_composition_by_id(composition_id: int, session: AsyncSession) -> Composition:
     query = (
         select(Composition)
         .options(
@@ -108,7 +104,6 @@ async def get_composition_by_id(composition_id: int, session: AsyncSession):
 
 
 async def get_all_composition(session: AsyncSession, paginator: Paginator, filter: Filter):
-    print(filter.ordering_values)
 
     query = (
         select(Composition)
@@ -137,3 +132,42 @@ async def get_composition_detail(composition_id: int, session: AsyncSession):
 async def get_composition_list(session: AsyncSession, paginator: Paginator, composition_filter):
     compositions = await get_all_composition(session, paginator, composition_filter)
     return [CompositionListSerializer.model_validate(composition, from_attributes=True) for composition in compositions]
+
+
+async def partial_update_composition(composition_id: int,
+                                     session: AsyncSession,
+                                     composition: CompositionUpdateSerializer):
+    composition_obj = await get_composition_by_id(composition_id, session)
+
+
+    composition_obj.title = composition.title or composition_obj.title
+    composition_obj.slug = composition.slug or composition_obj.slug
+    composition_obj.english_title = composition.english_title or composition_obj.english_title
+    composition_obj.another_name_title = composition.another_name_title or composition_obj.another_name_title
+    composition_obj.descriptions = composition.descriptions or composition_obj.descriptions
+    composition_obj.year_of_creations = composition.year_of_creations or composition_obj.year_of_creations
+
+    if composition.status:
+        new_status = await check_obj_in_db(session, composition.status, CompositionStatus)
+        composition_obj.status_id = new_status.id
+
+    if composition.type:
+        new_type = await check_obj_in_db(session, composition.type, CompositionType)
+        composition_obj.type_id = new_type.id
+    if composition.age_rating:
+        new_agerating = await check_obj_in_db(session, composition.age_rating, CompositionsAgeRating)
+        composition_obj.age_rating_id = new_agerating.id
+
+    if composition.composition_genres:
+        for genre in composition.composition_genres:
+            res = await check_obj_in_db(session, genre, CompositionGenre)
+            composition_obj.composition_genres.append(res)
+
+    if composition.composition_tags:
+        for tag in composition.composition_tags:
+            res = await check_obj_in_db(session, tag, CompositionTag)
+            composition_obj.composition_tags.append(res)
+
+    session.add(composition_obj)
+    await session.commit()
+    return CompositionDetailSerializer.model_validate(composition_obj, from_attributes=True)

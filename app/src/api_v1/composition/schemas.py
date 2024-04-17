@@ -1,6 +1,6 @@
 import json
 from decimal import Decimal
-from typing import Any, Annotated
+from typing import Any, Annotated, Optional
 from slugify import slugify
 from pydantic import BaseModel, Field, field_validator, computed_field, model_validator
 from sqlalchemy import Numeric
@@ -34,9 +34,9 @@ class CompositionGenreSerializer(CompositionAdditionalInfo):
 class CompositionCreateSerializer(BaseModel):
     title: str
     english_title: str
-    another_name_title: str | None
+    another_name_title: str
     year_of_creations: int = Field(ge=1980)
-    descriptions: str | None
+    descriptions: str
     status: int
     type: int
     age_rating: int
@@ -49,10 +49,29 @@ class CompositionCreateSerializer(BaseModel):
     def slug(self) -> str:
         return slugify(self.title)
 
-    @model_validator(mode="before")
-    @classmethod
-    def to_py_dict(cls, data):
-        return json.loads(data)
+    # @model_validator(mode="before")
+    # @classmethod
+    # def to_py_dict(cls, data):
+    #     return json.loads(data)
+
+
+class CompositionUpdateSerializer(BaseModel):
+    title: Optional[str] = None
+    english_title: Optional[str] = None
+    another_name_title: Optional[str] = None
+    year_of_creations: Optional[int] = Field(ge=1980, default=None)
+    descriptions: Optional[str] = None
+    status: Optional[int] = None
+    type: Optional[int] = None
+    age_rating: Optional[int] = None
+
+    composition_genres: Optional[list[int]] = None
+    composition_tags: Optional[list[int]] = None
+
+    @computed_field
+    @property
+    def slug(self) -> Optional[str]:
+        return slugify(self.title if self.title else None)
 
 
 class CompositionListSerializer(BaseModel):
@@ -98,4 +117,3 @@ class Paginator(BaseModel):
     @property
     def offset(self) -> int:
         return (self.page - 1) * self.page_size
-

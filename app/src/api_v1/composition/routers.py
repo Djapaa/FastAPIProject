@@ -5,18 +5,19 @@ from fastapi_filter import FilterDepends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from .services import create_new_composition, get_composition_detail, get_composition_list
+from .services import create_new_composition, get_composition_detail, get_composition_list, partial_update_composition, \
+    get_composition_by_id
 from ...config.database import get_async_session
-from .schemas import CompositionCreateSerializer, Paginator
+from .schemas import CompositionCreateSerializer, Paginator, CompositionUpdateSerializer
 from .filters import CompositionFilter
+from .models import Composition
 
 router = APIRouter()
 
 
 @router.get('/search/')
 async def get_filtered_list_of_composition(
-        session: Annotated[AsyncSession,
-        Depends(get_async_session)],
+        session: Annotated[AsyncSession, Depends(get_async_session)],
         paginator: Paginator = Depends(),
         composition_filter: CompositionFilter = FilterDepends(CompositionFilter)
 ):
@@ -32,13 +33,17 @@ async def get_composition(id: int, session: Annotated[AsyncSession, Depends(get_
 async def create_composition(
         session: Annotated[AsyncSession, Depends(get_async_session)],
         composition: CompositionCreateSerializer,
-        image: UploadFile = File(...),
 
 ):
-    await create_new_composition(composition, session, image)
+    await create_new_composition(composition, session)
     return Response(status_code=status.HTTP_201_CREATED)
 
 
-@router.patch('/')
-async def update_composition():
-    pass
+@router.patch('/{id}/')
+async def update_composition(
+        id: int,
+        session: Annotated[AsyncSession, Depends(get_async_session)],
+        composition: CompositionUpdateSerializer,
+
+):
+    return await partial_update_composition(id, session, composition)

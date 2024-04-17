@@ -11,6 +11,7 @@ from .settings import settings
 engine = create_async_engine(str(settings.ASYNC_DATABASE_URI),
                              echo=settings.ECHO)
 
+print(engine)
 # Создание асинхронной фабрики сессии
 async_session_factory = sessionmaker(engine,
                                      class_=AsyncSession,
