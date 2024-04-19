@@ -5,6 +5,7 @@ from fastapi_filter import FilterDepends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
+from ..chapter.routers import router as chapter_router
 from .services import create_new_composition, get_composition_detail, get_composition_list, partial_update_composition, \
     rating_add, bookmark_add
 from ..auth.schemas import UserInfoSerializer
@@ -16,12 +17,14 @@ from .filters import CompositionFilter
 
 router = APIRouter()
 
+router.include_router(router=chapter_router, tags=['Chapter'])
+
 
 @router.get('/search/')
 async def get_filtered_list_of_composition(
         session: Annotated[AsyncSession, Depends(get_async_session)],
-        paginator: Paginator = Depends(),
-        composition_filter: CompositionFilter = FilterDepends(CompositionFilter)
+        paginator: Annotated[Paginator, Depends()],
+        composition_filter: Annotated[CompositionFilter, FilterDepends(CompositionFilter)]
 ):
     return await get_composition_list(session, paginator, composition_filter)
 
@@ -67,4 +70,3 @@ async def composition_bookmark_add_or_update(id: int,
                                              bookmark: BookmarkSerializer,
                                              ):
     return await bookmark_add(id, current_user.id, session, bookmark.vote)
-

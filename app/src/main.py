@@ -10,6 +10,7 @@ from .api_v1.auth.models import *
 from .api_v1.auth.routers import router as auth_router
 from .api_v1.composition.routers import router as composition_router
 
+
 app = FastAPI()
 admin = Admin(app, engine)
 
@@ -19,6 +20,7 @@ router = APIRouter(prefix='/api/v1')
 router.include_router(prefix='/auth', tags=['Auth'], router=auth_router)
 
 router.include_router(prefix='/composition', tags=['Composition'], router=composition_router)
+
 
 app.include_router(router=router)
 

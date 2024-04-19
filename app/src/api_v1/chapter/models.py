@@ -5,8 +5,10 @@ from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import String, text, UniqueConstraint, ForeignKey
 
 from ...config.model import Model
+
 if TYPE_CHECKING:
     from ..composition.models import Composition
+
 
 class Chapter(Model):
     __table_args__ = (UniqueConstraint('composition_id', 'number', name='uq_chapter_number_composition'),)
@@ -37,14 +39,6 @@ class Page(Model):
     chapter_id: Mapped[int] = mapped_column(ForeignKey('chapter.id'))
     chapter: Mapped['Chapter'] = relationship(back_populates='pages')
 
-
-
-
-
-
-
-
-
 #     def save(self, *args, **kwargs):
 #         if self.is_published and self.pub_date is None:
 #             self.pub_date = timezone.now()
@@ -52,5 +46,3 @@ class Page(Model):
 #             self.pub_date = None
 #         super().save(*args, **kwargs)
 #
-
-
