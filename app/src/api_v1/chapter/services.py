@@ -1,17 +1,21 @@
-from fastapi import HTTPException, UploadFile, Depends
+from datetime import datetime
+
+from fastapi import HTTPException, UploadFile, Request
 from starlette import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from typing import TypeVar, Type, Annotated
+from typing import TypeVar, Type, Optional
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from itertools import zip_longest
 
 from .models import Page, Chapter
+from ..auth.models import User
+
+from ..auth.services import get_user_by_token
 from ..composition.models import Composition
 from ..composition.services import check_obj_in_db, upload_image
-from ...config.database import get_async_session
 
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 
@@ -58,10 +62,33 @@ class ChapterCRUD:
         await self.session.refresh(chapter_instance)
         return chapter_instance
 
-    # async def pablish_chapter(self, chapter_id):
-    #     instance = await self.get(chapter_id)
+    async def pablish_chapter(self, chapter_id: int, publish: bool):
+        """
+            опубликовать или отменить публикацию, время публикации устанавливается после первой публикации
+        """
+        instance = await self.get(chapter_id)
+        if not instance.is_published and publish and not instance.pub_date:
+            instance.is_published = True
+            if not instance.pub_date:
+                instance.pub_date = datetime.utcnow()
+        instance.is_published = publish
+        self.session.add(instance)
+        await self.session.commit()
+        return instance
 
-
+    async def get_published(self, chapter_id: int, current_user: Optional[User] = None):
+        """
+        Получить опубликованные главы, админы и персонал могут получить доступ к неопубликованным главам
+        """
+        chapter_instance = await self.get(chapter_id)
+        if not chapter_instance.is_published:
+            if current_user and (current_user.is_superuser or current_user.is_stuff):
+                return chapter_instance
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Not found",
+            )
+        return chapter_instance
 
     async def get(self, chapter_id: int):
         await check_obj_in_db(self.session, chapter_id, self.model)
@@ -77,3 +104,13 @@ class ChapterCRUD:
         return chapter_instance.scalar()
 
 
+async def get_current_user_for_chapter_crud(request: Request, session):
+    header_auth = request.headers.get('Authorization', None)
+    if not header_auth:
+        return None
+
+    prefix, token = header_auth.split()
+    if prefix != 'Bearer':
+        return None
+
+    return await get_user_by_token(token, session)

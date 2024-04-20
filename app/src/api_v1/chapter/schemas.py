@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import Annotated
 from pydantic import BaseModel, Field
 
+class Publish(BaseModel):
+    publish: bool
 
 class PageCreateSerializer(BaseModel):
     page_image: str
