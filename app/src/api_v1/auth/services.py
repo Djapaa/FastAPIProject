@@ -169,3 +169,18 @@ async def get_current_user(session: Annotated[AsyncSession, Depends(get_async_se
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
+async def get_current_verify_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    if not current_user.is_verified:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+async def get_current_admin_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+
+    if current_user.is_stuff or current_user.is_superuser:
+        return current_user
+    raise HTTPException(status_code=400, detail="Not admin")
