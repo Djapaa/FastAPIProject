@@ -8,6 +8,7 @@ from ...config.model import Model
 
 if TYPE_CHECKING:
     from ..composition.models import Composition
+    from ..likedislike.models import LikeDislike
 
 
 class Chapter(Model):
@@ -29,6 +30,8 @@ class Chapter(Model):
 
     pages: Mapped[list['Page']] = relationship(back_populates='chapter')
 
+    votes: Mapped[list['LikeDislike']] = relationship(back_populates='liked_chapter')
+
 
 class Page(Model):
     __table_args__ = (UniqueConstraint('number', 'chapter_id', name='uq_page_chapter_number'),)
@@ -38,11 +41,3 @@ class Page(Model):
 
     chapter_id: Mapped[int] = mapped_column(ForeignKey('chapter.id'))
     chapter: Mapped['Chapter'] = relationship(back_populates='pages')
-
-#     def save(self, *args, **kwargs):
-#         if self.is_published and self.pub_date is None:
-#             self.pub_date = timezone.now()
-#         elif not self.is_published and self.pub_date is not None:
-#             self.pub_date = None
-#         super().save(*args, **kwargs)
-#

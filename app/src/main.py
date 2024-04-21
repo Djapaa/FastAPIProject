@@ -9,6 +9,8 @@ from .config.database import engine
 from .api_v1.auth.models import *
 from .api_v1.auth.routers import router as auth_router
 from .api_v1.composition.routers import router as composition_router
+from .api_v1.comment.router import router as comment_router
+from .api_v1.likedislike.routers import router as like_dislike_router
 
 app = FastAPI()
 admin = Admin(app, engine)
@@ -18,6 +20,10 @@ router = APIRouter(prefix='/api/v1')
 router.include_router(prefix='/auth', tags=['Auth'], router=auth_router)
 
 router.include_router(prefix='/composition', tags=['Composition'], router=composition_router)
+
+router.include_router(prefix='/comment', tags=['Comment'], router=comment_router)
+
+router.include_router(prefix='/vote', tags=['Vote'], router=like_dislike_router)
 
 app.include_router(router=router)
 
@@ -59,6 +65,9 @@ class ChapterAdmin(ModelView, model=Chapter):
     column_list = [Chapter.id, Chapter.is_published]
 
 
+class LikeDislikeAdmin(ModelView, model=LikeDislike):
+    column_list = [LikeDislike.id, LikeDislike.user_id, LikeDislike.chapter_id]
+
 admin.add_view(UserAdmin)
 admin.add_view(UserTokenAdmin)
 
@@ -69,3 +78,4 @@ admin.add_view(TypeAdmin)
 admin.add_view(AgeratingAdmin)
 admin.add_view(GenreAdmin)
 admin.add_view(ChapterAdmin)
+admin.add_view(LikeDislikeAdmin)

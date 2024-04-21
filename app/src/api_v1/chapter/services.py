@@ -21,9 +21,9 @@ CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 
 
 class ChapterCRUD:
-    def __init__(self, session: AsyncSession, model: Type[Chapter]):
+    def __init__(self, session: AsyncSession):
         self.session = session
-        self.model = model
+        self.model = Chapter
 
     async def create(self, create_serializer: CreateSchemaType, composition_id: int):
         await check_obj_in_db(self.session, composition_id, Composition)

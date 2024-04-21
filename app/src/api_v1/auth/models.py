@@ -1,12 +1,13 @@
 import enum
 from datetime import datetime
 
-from pydantic import EmailStr, Field
-from sqlalchemy import String, Numeric, text, Column, ForeignKey
+
+from sqlalchemy import String, Numeric, text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import TYPE_CHECKING
 from ...config.model import Model
 
+from ..likedislike.models import LikeDislike
 
 if TYPE_CHECKING:
     from ..composition.models import Composition
@@ -46,6 +47,8 @@ class User(Model):
     evaluated_and_bookmark_compositions: Mapped[list["Composition"]] = relationship(back_populates='readers',
                                                                                    secondary='user_composition_relation'
                                                                                    )
+
+    voted: Mapped[list['LikeDislike']] = relationship(back_populates='user')
 
 
 class Token(Model):

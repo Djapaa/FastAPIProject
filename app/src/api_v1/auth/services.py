@@ -56,9 +56,9 @@ async def get_user_by_token(token: str, session: AsyncSession):
     )
     query = (
         select(User)
-        .options(
-            selectinload(User.evaluated_and_bookmark_compositions)
-        )
+        # .options(
+        #     selectinload(User.evaluated_and_bookmark_compositions)
+        # )
         .filter(User.id == subq.c.user_id)
     )
     res = await session.execute(query)
