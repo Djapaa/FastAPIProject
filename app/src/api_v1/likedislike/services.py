@@ -34,8 +34,20 @@ class VoteCRUD:
         return instance
 
     async def create_vote(self, voted_model: Type[Model], voted_obj_id: int, vote_type: bool, user_id: int):
+        """
+        Функция для создания(удаления если повтороно отправить запрос с теми же данными) лайков и дизлайков.
+        param: voted_model
+            Модель(орм таблица) которая имеет поле vote, которое ссылается на модель LikeDislike
+            Пример модель Chapter которая имеет many->one LikeDislike
+        param: voted_obj_id
+            id обьекта которому будет установлен или удален лайк/дизлайк
+            к примеру chapter_id
+        """
+
         vote_type = 1 if vote_type else -1
         await check_obj_in_db(self.session, voted_obj_id, voted_model)
+        #Создание словаря для дальнейшего его использования при добавлении
+        #К примеру chapter_id: id или comment_id: id
         obj_id = {f'{voted_model.__name__.lower()}_id': voted_obj_id}
         try:
             vote_instance = await self.get_vote(voted_model, voted_obj_id, user_id)
