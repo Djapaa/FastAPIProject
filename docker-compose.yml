@@ -44,6 +44,21 @@ services:
       - database
       - redis
 
+  beat:
+    container_name: celery-beat2
+    build: .
+    restart: always
+    command: python -m celery -A src.config.celery_conf.celery beat --loglevel=info
+
+    volumes:
+      - ./app:/app
+
+    depends_on:
+      - database
+      - redis
+    env_file:
+      - .env
+
   flower:
     build:
       context: .
