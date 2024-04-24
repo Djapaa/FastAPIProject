@@ -5,12 +5,12 @@ from celery import shared_task
 from .models import Composition, UserCompositionRelation
 from ..chapter.models import Chapter
 from ..likedislike.models import LikeDislike
-from ...config.database import async_session_factory
+from ...config.database import async_session
 from sqlalchemy import select, distinct, func, bindparam, update
 
 
 async def calculate_bookmarks_ratings_votes_task():
-    async with async_session_factory() as session:
+    async with async_session() as session:
         subq = (
             select(
                 Composition.id,
