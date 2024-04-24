@@ -10,7 +10,8 @@ from ...config.model import Model
 from ..likedislike.models import LikeDislike
 
 if TYPE_CHECKING:
-    from ..composition.models import Composition
+    from ..composition.models import Composition, UserCompositionRelation
+
 
 
 class GenderEnum(str, enum.Enum):
@@ -44,9 +45,12 @@ class User(Model):
 
     tokens: Mapped[list['Token']] = relationship(back_populates="user")
 
-    evaluated_and_bookmark_compositions: Mapped[list["Composition"]] = relationship(back_populates='readers',
-                                                                                   secondary='user_composition_relation'
-                                                                                   )
+    # evaluated_and_bookmark_compositions: Mapped[list["Composition"]] = relationship(back_populates='readers',
+    #                                                                                secondary='user_composition_relation'
+    #                                                                                )
+    rating_and_bookmark: Mapped[list['UserCompositionRelation']] = relationship(
+        back_populates='user'
+    )
 
     voted: Mapped[list['LikeDislike']] = relationship(back_populates='user')
 

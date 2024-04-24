@@ -21,7 +21,7 @@ class Composition(Model):
     created_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
     updated_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"),
                                                  onupdate=datetime.utcnow)
-    descriptions: Mapped[str] = mapped_column(nullable=True)  # информация о пользователе
+    descriptions: Mapped[str] = mapped_column(nullable=True)
     composition_image: Mapped[str] = mapped_column(default='media/composition/default.png')
     view: Mapped[int] = mapped_column(default=0)
     count_rating: Mapped[int] = mapped_column(default=0)
@@ -46,9 +46,12 @@ class Composition(Model):
                                                                     secondary='composition_tag_relation'
                                                                     )
 
-    readers: Mapped[list['User']] = relationship(back_populates='evaluated_and_bookmark_compositions',
-                                                 secondary='user_composition_relation'
-                                                 )
+    # readers: Mapped[list['User']] = relationship(back_populates='evaluated_and_bookmark_compositions',
+    #                                              secondary='user_composition_relation'
+    #                                              )
+    rating_and_bookmark: Mapped[list['UserCompositionRelation']] = relationship(
+        back_populates='composition'
+    )
 
     chapters: Mapped[list['Chapter']] = relationship(back_populates='composition')
 
@@ -118,6 +121,9 @@ class UserCompositionRelation(Model):
 
     composition_id: Mapped[int] = mapped_column(ForeignKey("composition.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+
+    user: Mapped["User"] = relationship(back_populates="rating_and_bookmark")
+    composition: Mapped["Composition"] = relationship(back_populates="rating_and_bookmark")
 
     bookmark: Mapped[int] = mapped_column(nullable=True)
     rating: Mapped[int] = mapped_column(nullable=True)
