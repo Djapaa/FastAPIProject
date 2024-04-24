@@ -30,6 +30,20 @@ services:
     volumes:
       - ~/pgdata2:/var/lib/postgresql/data
 
+  database-test:
+    container_name: postgres
+    image: postgres:14.6-alpine
+    ports:
+      - "15433:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    volumes:
+      - ~/pgdata-test:/var/lib/postgresql/data
+
 
   worker:
     container_name: celery-worker
