@@ -1,11 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, UploadFile, Form, Body, File, Response, Query
+from fastapi import APIRouter, Depends, Response
 from fastapi_filter import FilterDepends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from ..chapter.routers import router as chapter_router
 from .services import create_new_composition, get_composition_detail, get_composition_list, partial_update_composition, \
     rating_add, bookmark_add
 from ..auth.schemas import UserInfoSerializer
@@ -16,8 +15,6 @@ from .schemas import CompositionCreateSerializer, Paginator, CompositionUpdateSe
 from .filters import CompositionFilter
 
 router = APIRouter()
-
-router.include_router(router=chapter_router, tags=['Chapter'])
 
 
 @router.get('/search/')

@@ -12,7 +12,7 @@ from starlette import status
 from .models import Composition, CompositionGenre, CompositionTag, CompositionStatus, CompositionType, \
     CompositionsAgeRating, UserCompositionRelation
 from .schemas import CompositionCreateSerializer, CompositionDetailSerializer, Paginator, CompositionListSerializer, \
-    CompositionUpdateSerializer, RatingSerializer, BookmarkSerializer
+    CompositionUpdateSerializer
 from ...config.model import Model
 from ...config.settings import settings
 
@@ -95,13 +95,14 @@ async def get_composition_by_id(composition_id: int, session: AsyncSession) -> C
             selectinload(Composition.composition_tags)
         )
         .filter(Composition.id == composition_id)
-
     )
+
     composition = await session.scalar(query)
     if not composition:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f'Composition with {composition_id=}, not found')
+                            detail=f'Composition not found')
     return composition
+
 
 
 async def get_all_composition(session: AsyncSession, paginator: Paginator, filter: Filter):

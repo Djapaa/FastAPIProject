@@ -43,12 +43,13 @@ async def chapter_pages_update(
     return ChapterDetailSerializer.model_validate(chapter_instance, from_attributes=True)
 
 
-@router.patch('/chapter/{id}/publish/', dependencies=[Depends(get_current_admin_user)])
+@router.patch('/chapter/{id}/publish/', dependencies=[Depends(get_current_admin_user)],description='Публикация главы')
 async def publish_chapter(
         session: Annotated[AsyncSession, Depends(get_async_session)],
         id: int,
         publish: Publish
 ):
+
     chapter_crud = ChapterCRUD(session)
     chapter_instance = await chapter_crud.pablish_chapter(id, publish.publish)
     return ChapterDetailSerializer.model_validate(chapter_instance, from_attributes=True)
