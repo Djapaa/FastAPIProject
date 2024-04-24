@@ -48,6 +48,27 @@ class Settings(BaseSettings):
                 )
         return v
 
+    TEST_DB_NAME: str
+    TEST_DB_HOST: str
+    TEST_DB_PASS: str
+    TEST_DB_PORT: int
+    TEST_DB_USER: str
+    ASYNC_TEST_DATABASE_URI: PostgresDsn | str = ""
+
+    @field_validator("ASYNC_TEST_DATABASE_URI", mode="after")
+    def assemble_test_db_connection(cls, v: str | None, info: FieldValidationInfo) -> Any:
+        if isinstance(v, str):
+            if v == "":
+                return PostgresDsn.build(
+                    scheme="postgresql+asyncpg",
+                    username=info.data["TEST_DB_USER"],
+                    password=info.data["TEST_DB_PASS"],
+                    host=info.data["TEST_DB_HOST"],
+                    port=info.data["TEST_DB_PORT"],
+                    path=info.data["TEST_DB_NAME"],
+                )
+        return v
+
     CELERY_BROKER_URL: str
     CELERY_RESULT_BACKEND: str
 
