@@ -31,7 +31,7 @@ services:
       - ~/pgdata2:/var/lib/postgresql/data
 
   database-test:
-    container_name: postgres
+    container_name: postgres-test
     image: postgres:14.6-alpine
     ports:
       - "15433:5432"
