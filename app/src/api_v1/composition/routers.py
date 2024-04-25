@@ -4,12 +4,13 @@ from fastapi import APIRouter, Depends, Response
 from fastapi_filter import FilterDepends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+from sqlalchemy import text
 
 from .services import create_new_composition, get_composition_detail, get_composition_list, partial_update_composition, \
     rating_add, bookmark_add
 from ..auth.schemas import UserInfoSerializer
 from ..auth.services import get_current_user
-from ...config.database import get_async_session
+from ...config.database import get_async_session, engine, async_session
 from .schemas import CompositionCreateSerializer, Paginator, CompositionUpdateSerializer, RatingSerializer, \
     BookmarkSerializer
 from .filters import CompositionFilter
@@ -67,3 +68,8 @@ async def composition_bookmark_add_or_update(id: int,
                                              bookmark: BookmarkSerializer,
                                              ):
     return await bookmark_add(id, current_user.id, session, bookmark.vote)
+
+@router.get('/test')
+async def test():
+    async with engine.begin() as conn:
+        await conn.execute(text('select 1'))

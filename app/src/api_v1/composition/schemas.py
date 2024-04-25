@@ -79,7 +79,7 @@ class CompositionListSerializer(BaseModel):
     title: str
     composition_image: str
     type: CompositionTypeSerializer
-    avg_rating: int
+    avg_rating: Decimal
 
     class Config:
         from_attributes = True
