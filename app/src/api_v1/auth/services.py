@@ -100,6 +100,7 @@ async def user_registration(user: UserCreateSerializer, session: AsyncSession):
     verify_uuid = str(uuid.uuid4())
     await redis_set_email_verification_key(user.email, verify_uuid)
     send_verification_mail.delay(user.username, user.email, verify_uuid)
+    return new_user
 
 
 async def user_verify(uuid: str, session: AsyncSession):

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from .schemas import UserCreateSerializer, UserInfoSerializer, oauth2_scheme
-from .services import user_registration, user_login,  user_logout, user_verify, get_current_user
+from .services import user_registration, user_login, user_logout, user_verify, get_current_user
 from ...config.database import get_async_session
 
 router = APIRouter()
@@ -19,8 +19,8 @@ async def signup(user: UserCreateSerializer, session: Annotated[AsyncSession, De
     """
         Регистрация пользователя
     """
-    await user_registration(user, session)
-    return Response(status_code=status.HTTP_201_CREATED)
+    user = await user_registration(user, session)
+    return UserInfoSerializer.model_validate(user, from_attributes=True)
 
 
 @router.post('/login', status_code=200)
