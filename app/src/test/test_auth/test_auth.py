@@ -161,8 +161,12 @@ async def test_create_user(ac: AsyncClient,
                            data: dict,
                            expected_status: int,
                            expected_response):
+
+    # мок на отправку сообщения на почту
     monkeypatch.setattr(send_verification_mail, 'delay', mock_send_mail_return)
+    # мок на установку ключа верификации в редис
     monkeypatch.setattr(services, 'redis_set_email_verification_key', mock_redis_set_email_verification_key)
+    # мок на получение ключа верификации в редис
     monkeypatch.setattr(services, 'redis_get_email_by_uuid', mock_redis_get_email_by_uuid)
 
     response = await ac.post('/api/v1/auth/signup/', json=data)
@@ -172,7 +176,9 @@ async def test_create_user(ac: AsyncClient,
     verify_uuid = str(uuid.uuid4())
     await redis_set_email_verification_key(data['email'], verify_uuid)
     redis_email = await redis_get_email_by_uuid(verify_uuid)
+    # проверка на то, что по установленному uuid: email можно получить email
     assert redis_email == data['email']
+    # Проверка на то что функция запускается
     assert send_verification_mail.delay(data['username'], data['email'], verify_uuid) == True
 
     response_json = response.json()
