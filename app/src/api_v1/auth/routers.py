@@ -46,12 +46,12 @@ async def logout(session: Annotated[AsyncSession, Depends(get_async_session)],
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get('/current', response_model=UserInfoSerializer)
+@router.get('/current/', response_model=UserInfoSerializer)
 async def read_users_me(current_user: Annotated[UserInfoSerializer, Depends(get_current_user)]):
     return current_user
 
 
-@router.post('/verify/{user_verify_uuid}')
+@router.post('/verify/{user_verify_uuid}/')
 async def user_account_verification(user_verify_uuid, session: Annotated[AsyncSession, Depends(get_async_session)]):
     await user_verify(user_verify_uuid, session)
     return Response(status_code=status.HTTP_200_OK)

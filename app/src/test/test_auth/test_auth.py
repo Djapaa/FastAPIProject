@@ -298,7 +298,7 @@ async def test_create_user(
                          ])
 async def test_login(
         ac: AsyncClient,
-        create_login_user,
+        create_user,
         monkeypatch,
         data,
         expected_status,
@@ -310,3 +310,87 @@ async def test_login(
     assert response.status_code == expected_status
     assert response.json() == expected_response
 
+
+@pytest.mark.parametrize('headers, expected_status, expected_response',
+                         [
+                             (
+                                     {'Authorization': 'Bearer 1q2w3e'},
+                                     200,
+                                     {
+                                         'id': 1,
+                                         'username': 'test',
+                                         'email': 'test@mail.ru',
+                                         'is_stuff': False,
+                                         'is_superuser': False,
+                                         'is_verified': True,
+                                         'balance': "0.00",
+                                         'descriptions': None,
+                                         'gender': 'Not specified',
+                                         'created_at': '2024-01-01T00:00:00',
+                                         'email_not': False,
+                                         'avatar': 'media/user/default.png'
+                                     }
+                             ),
+                             (
+                                     {'Authorization': 'Bearer 1q2w3eeee'},
+                                     401,
+                                     {
+                                         "detail": "Invalid authentication credentials"
+                                     }
+                             ),
+                             (
+                                     {},
+                                     401,
+                                     {
+                                         "detail": "Not authenticated"
+                                     }
+                             )
+
+                         ])
+async def test_current_user(
+        ac: AsyncClient,
+        create_login_user,
+        headers,
+        expected_status,
+        expected_response
+):
+    response = await ac.get('/api/v1/auth/current/', headers=headers)
+    assert response.status_code == expected_status
+    assert response.json() == expected_response
+
+
+@pytest.mark.parametrize('headers, expected_status, expected_response',
+                         [
+                             (
+                                     {},
+                                     401,
+                                     {
+                                         "detail": "Not authenticated"
+                                     }
+                             ),
+
+                             (
+                                     {'Authorization': 'Bearer 1q2w3ee'},
+                                     401,
+                                     {
+                                         "detail": "Invalid authentication credentials"
+                                     }
+                             ),
+
+                             (
+                                     {'Authorization': 'Bearer 1q2w3e'},
+                                     204,
+                                     {}
+                             )
+                         ])
+async def test_logout(
+        ac: AsyncClient,
+        create_login_user,
+        headers,
+        expected_status,
+        expected_response
+):
+    response = await ac.post('/api/v1/auth/logout/', headers=headers)
+    assert response.status_code == expected_status
+    if response.status_code != 204:
+        assert response.json() == expected_response

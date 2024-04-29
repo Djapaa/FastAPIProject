@@ -8,20 +8,25 @@ from ...api_v1.auth.services import get_password_hash
 
 @pytest.fixture(scope='session')
 async def create_user():
+    dt = datetime(2024, 1, 1, hour=0,
+                  minute=0, second=0, microsecond=0)
     async with test_async_session() as session:
         new_user = User(
             username='test',
             email='test@mail.ru',
             hashed_password=get_password_hash('12345'),
-            is_verified=True
+            is_verified=True,
+            created_at=dt
         )
         session.add(new_user)
-        await session.commit()
-
+        try:
+            await session.commit()
+        except:
+            await session.rollback()
 
 @pytest.fixture(scope='session')
 async def create_login_user(create_user):
-    dt = datetime(2024, 1, 1, hour=0,
+    dt = datetime(2025, 1, 1, hour=0,
                   minute=0, second=0, microsecond=0)
 
     async with test_async_session() as session:
