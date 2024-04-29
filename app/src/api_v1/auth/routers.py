@@ -23,14 +23,17 @@ async def signup(user: UserCreateSerializer, session: Annotated[AsyncSession, De
     return UserInfoSerializer.model_validate(user, from_attributes=True)
 
 
-@router.post('/login', status_code=200)
+@router.post('/login/', status_code=200)
 async def login(
         session: Annotated[AsyncSession, Depends(get_async_session)],
         user_form: OAuth2PasswordRequestForm = Depends()
 ):
     token = await user_login(user_form, session)
     return JSONResponse(
-        content={"access_token": token},
+        content={
+            "access_token": token,
+            'type': 'bearer'
+        },
         status_code=status.HTTP_200_OK
     )
 

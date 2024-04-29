@@ -27,6 +27,10 @@ def mock_send_mail_return(username, email, verify_uuid):
     return True
 
 
+def mock_get_token():
+    return '12345ef'
+
+
 @pytest.mark.parametrize('data, expected_status, expected_response',
                          [
                              (
@@ -152,16 +156,40 @@ def mock_send_mail_return(username, email, verify_uuid):
                                          ]
                                      }
 
+                             ),
+                             (
+                                     {
+                                         "username": "test1111",
+                                         "email": "test@mail.ru",
+                                         "password": "12345"
+                                     },
+                                     400,
+                                     {
+                                         "detail": "User with such email or login already exists"
+                                     }
+
+                             ),
+                             (
+                                     {
+                                         "username": "test",
+                                         "email": "test11111@mail.ru",
+                                         "password": "12345"
+                                     },
+                                     400,
+                                     {
+                                         "detail": "User with such email or login already exists"
+                                     }
+
                              )
-
                          ])
-async def test_create_user(ac: AsyncClient,
-                           monkeypatch,
-                           create_user,
-                           data: dict,
-                           expected_status: int,
-                           expected_response):
-
+async def test_create_user(
+        ac: AsyncClient,
+        monkeypatch,
+        create_user,
+        data: dict,
+        expected_status: int,
+        expected_response
+):
     # мок на отправку сообщения на почту
     monkeypatch.setattr(send_verification_mail, 'delay', mock_send_mail_return)
     # мок на установку ключа верификации в редис
@@ -197,3 +225,87 @@ async def test_create_user(ac: AsyncClient,
         assert response_json['avatar'] == expected_response['avatar']
     else:
         assert response_json == expected_response
+
+
+@pytest.mark.parametrize('data, expected_status, expected_response',
+                         [
+                             (
+                                     {
+                                         'username': 'test@mail.ru',
+                                         'password': '12345'
+                                     },
+                                     200,
+                                     {
+                                         'access_token': '12345ef',
+                                         'type': 'bearer'
+                                     }
+
+                             ),
+                             (
+                                     {
+                                         'username': 'test1111@mail.ru',
+                                         'password': '12345'
+                                     },
+                                     400,
+                                     {
+                                         "detail": "Incorrect email or password"
+                                     }
+
+                             ),
+                             (
+                                     {
+                                         'username': 'test@mail.ru',
+                                         'password': '123456'
+                                     },
+                                     400,
+                                     {
+                                         "detail": "Incorrect email or password"
+                                     }
+
+                             ),
+                             (
+                                     {
+                                         'username': '',
+                                         'password': ''
+                                     },
+                                     422,
+                                     {
+                                         "detail": [
+                                             {
+                                                 "type": "missing",
+                                                 "loc": [
+                                                     "body",
+                                                     "username"
+                                                 ],
+                                                 "msg": "Field required",
+                                                 "input": None,
+                                                 "url": "https://errors.pydantic.dev/2.6/v/missing"
+                                             },
+                                             {
+                                                 "type": "missing",
+                                                 "loc": [
+                                                     "body",
+                                                     "password"
+                                                 ],
+                                                 "msg": "Field required",
+                                                 "input": None,
+                                                 "url": "https://errors.pydantic.dev/2.6/v/missing"
+                                             }
+                                         ]
+                                     }
+
+                             )
+                         ])
+async def test_login(
+        ac: AsyncClient,
+        create_user,
+        monkeypatch,
+        data,
+        expected_status,
+        expected_response
+):
+    monkeypatch.setattr(services, 'get_token', mock_get_token)
+
+    response = await ac.post('/api/v1/auth/login/', data=data)
+    assert response.status_code == expected_status
+    assert response.json() == expected_response
