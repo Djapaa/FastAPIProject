@@ -9,7 +9,7 @@ from pytest_mock import MockerFixture
 from ...api_v1.auth.services import redis_set_email_verification_key, redis_get_email_by_uuid
 from ...api_v1.auth.tasks import send_verification_mail, get_message
 from ...api_v1.auth import services
-from .fixtures import create_user
+from .fixtures import create_user, create_login_user
 import pytest
 
 from ...config.redis_conf import test_redis
@@ -298,7 +298,7 @@ async def test_create_user(
                          ])
 async def test_login(
         ac: AsyncClient,
-        create_user,
+        create_login_user,
         monkeypatch,
         data,
         expected_status,
@@ -309,3 +309,4 @@ async def test_login(
     response = await ac.post('/api/v1/auth/login/', data=data)
     assert response.status_code == expected_status
     assert response.json() == expected_response
+
