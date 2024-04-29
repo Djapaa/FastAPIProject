@@ -6,7 +6,7 @@ from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import EmailStr
 from sqlalchemy import select, or_, delete, Result
-from sqlalchemy.orm import selectinload
+from sqlalchemy.exc import MultipleResultsFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from fastapi import HTTPException, Depends
@@ -19,7 +19,6 @@ from ...config.database import get_async_session
 from ...config.redis_conf import redis
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 
 async def get_user_by_username_or_email(username: str, session: AsyncSession,
@@ -40,10 +39,13 @@ async def get_user_by_username_or_email(username: str, session: AsyncSession,
             )
         )
     )
+
     res = await session.execute(query)
-    return res.mappings().one_or_none()
-
-
+    try:
+        res = res.mappings().one_or_none()
+    except MultipleResultsFound:
+        raise HTTPException(status_code=400, detail='User with such email or login already exists')
+    return res
 
 
 async def get_user_by_token(token: str, session: AsyncSession):
@@ -85,7 +87,7 @@ async def redis_get_email_by_uuid(uuid: str):
 
 async def user_registration(user: UserCreateSerializer, session: AsyncSession):
     if await get_user_by_username_or_email(user.username, session, user.email):
-        raise HTTPException(status_code=400, detail='User already exists')
+        raise HTTPException(status_code=400, detail='User with such email or login already exists')
 
     # Добавление нового юзера
     new_user = User(
@@ -160,7 +162,6 @@ async def user_logout(session: AsyncSession,
 
 async def get_current_user(session: Annotated[AsyncSession, Depends(get_async_session)],
                            token: Annotated[str, Depends(oauth2_scheme)]):
-
     user = await get_user_by_token(token, session)
 
     if not user:
@@ -171,17 +172,18 @@ async def get_current_user(session: Annotated[AsyncSession, Depends(get_async_se
         )
     return user
 
+
 async def get_current_verify_user(
-    current_user: Annotated[User, Depends(get_current_user)],
+        current_user: Annotated[User, Depends(get_current_user)],
 ):
     if not current_user.is_verified:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
-async def get_current_admin_user(
-    current_user: Annotated[User, Depends(get_current_user)],
-):
 
+async def get_current_admin_user(
+        current_user: Annotated[User, Depends(get_current_user)],
+):
     if current_user.is_stuff or current_user.is_superuser:
         return current_user
     raise HTTPException(status_code=400, detail="Not admin")
