@@ -35,9 +35,9 @@ async def get_composition(id: int, session: Annotated[AsyncSession, Depends(get_
     return CompositionDetailSerializer.model_validate(composition, from_attributes=True)
 
 
-@router.post('/', status_code=201)
+@router.post('/', status_code=201, dependencies=[Depends(get_current_admin_user)])
 async def create_composition(
-        session: Annotated[AsyncSession, Depends(get_current_admin_user)],
+        session: Annotated[AsyncSession, Depends(get_async_session)],
         composition: CompositionCreateSerializer,
 
 ):
@@ -45,10 +45,10 @@ async def create_composition(
     return await composition_crud.create(composition)
 
 
-@router.patch('/{id}/')
+@router.patch('/{id}/', dependencies=[Depends(get_current_admin_user)])
 async def update_composition(
         id: int,
-        session: Annotated[AsyncSession, Depends(get_current_admin_user)],
+        session: Annotated[AsyncSession, Depends(get_async_session)],
         composition: CompositionUpdateSerializer,
 
 ):

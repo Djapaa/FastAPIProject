@@ -71,7 +71,7 @@ class CompositionUpdateSerializer(BaseModel):
     @computed_field
     @property
     def slug(self) -> Optional[str]:
-        return slugify(self.title if self.title else None)
+        return slugify(self.title) if self.title else None
 
 
 class CompositionListSerializer(BaseModel):
