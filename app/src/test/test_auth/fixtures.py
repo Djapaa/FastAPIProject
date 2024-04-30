@@ -27,7 +27,7 @@ async def create_verify_user():
 
 
 @pytest.fixture(scope='session')
-async def create_login_user(create_verify_user):
+async def create_login_token_for_verify_user(create_verify_user):
     dt = datetime(2025, 1, 1, hour=0,
                   minute=0, second=0, microsecond=0)
 
