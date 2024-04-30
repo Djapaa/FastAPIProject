@@ -1,4 +1,4 @@
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException
 from fastapi_filter.contrib.sqlalchemy import Filter
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
