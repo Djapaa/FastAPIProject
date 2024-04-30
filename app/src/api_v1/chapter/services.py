@@ -4,7 +4,7 @@ from fastapi import HTTPException, UploadFile, Request
 from starlette import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from typing import TypeVar, Type, Optional
+from typing import TypeVar, Optional
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
@@ -15,7 +15,7 @@ from ..auth.models import User
 
 from ..auth.services import get_user_by_token
 from ..composition.models import Composition
-from ..composition.services import check_obj_in_db, upload_image
+from ..general_services import check_obj_in_db, upload_image
 
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 

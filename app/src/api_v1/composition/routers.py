@@ -1,18 +1,16 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends
+
 from fastapi_filter import FilterDepends
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette import status
-from sqlalchemy import text
 
-from .services import create_new_composition, get_composition_detail, get_composition_list, partial_update_composition, \
-    rating_add, bookmark_add
+from .services import CompositionCRUD
 from ..auth.schemas import UserInfoSerializer
-from ..auth.services import get_current_user
-from ...config.database import get_async_session, engine, async_session
+from ..auth.services import get_current_user, get_current_admin_user
+from ...config.database import get_async_session
 from .schemas import CompositionCreateSerializer, Paginator, CompositionUpdateSerializer, RatingSerializer, \
-    BookmarkSerializer
+    BookmarkSerializer, CompositionDetailSerializer, CompositionListSerializer
 from .filters import CompositionFilter
 
 router = APIRouter()
@@ -24,52 +22,59 @@ async def get_filtered_list_of_composition(
         paginator: Annotated[Paginator, Depends()],
         composition_filter: Annotated[CompositionFilter, FilterDepends(CompositionFilter)]
 ):
-    return await get_composition_list(session, paginator, composition_filter)
+    composition_crud = CompositionCRUD(session)
+    print(composition_filter)
+    compositions = await composition_crud.get_paginate_and_filtered_list(paginator, composition_filter)
+    return [CompositionListSerializer.model_validate(composition, from_attributes=True) for composition in compositions]
 
 
 @router.get('/{id}/')
 async def get_composition(id: int, session: Annotated[AsyncSession, Depends(get_async_session)]):
-    return await get_composition_detail(id, session)
+    composition_crud = CompositionCRUD(session)
+    composition = await composition_crud.get(id)
+    return CompositionDetailSerializer.model_validate(composition, from_attributes=True)
 
 
-@router.post('/')
+@router.post('/', status_code=201)
 async def create_composition(
-        session: Annotated[AsyncSession, Depends(get_async_session)],
+        session: Annotated[AsyncSession, Depends(get_current_admin_user)],
         composition: CompositionCreateSerializer,
 
 ):
-    await create_new_composition(composition, session)
-    return Response(status_code=status.HTTP_201_CREATED)
+    composition_crud = CompositionCRUD(session)
+    return await composition_crud.create(composition)
 
 
 @router.patch('/{id}/')
 async def update_composition(
         id: int,
-        session: Annotated[AsyncSession, Depends(get_async_session)],
+        session: Annotated[AsyncSession, Depends(get_current_admin_user)],
         composition: CompositionUpdateSerializer,
 
 ):
-    return await partial_update_composition(id, session, composition)
+    composition_crud = CompositionCRUD(session)
+    return await composition_crud.partial_update(id, composition)
 
 
-@router.post('/{id}/rating/')
-async def composition_rating_add_or_update(id: int,
-                                           current_user: Annotated[UserInfoSerializer, Depends(get_current_user)],
-                                           session: Annotated[AsyncSession, Depends(get_async_session)],
-                                           rating: RatingSerializer,
-                                           ):
-    return await rating_add(id, current_user.id, session, rating.vote)
+@router.post('/{composition_id}/rating/')
+async def composition_rating_add_or_update(
+        composition_id: int,
+        current_user: Annotated[UserInfoSerializer, Depends(get_current_user)],
+        session: Annotated[AsyncSession, Depends(get_async_session)],
+        rating: RatingSerializer,
+):
+    print(rating.vote)
+    print(100 * '1')
+    composition_crud = CompositionCRUD(session)
+    return await composition_crud.rating_add(composition_id, current_user.id, rating.vote)
 
 
-@router.post('/{id}/bookmark/')
-async def composition_bookmark_add_or_update(id: int,
-                                             current_user: Annotated[UserInfoSerializer, Depends(get_current_user)],
-                                             session: Annotated[AsyncSession, Depends(get_async_session)],
-                                             bookmark: BookmarkSerializer,
-                                             ):
-    return await bookmark_add(id, current_user.id, session, bookmark.vote)
-
-@router.get('/test')
-async def test():
-    async with engine.begin() as conn:
-        await conn.execute(text('select 1'))
+@router.post('/{composition_id}/bookmark/')
+async def composition_bookmark_add_or_update(
+        composition_id: int,
+        current_user: Annotated[UserInfoSerializer, Depends(get_current_user)],
+        session: Annotated[AsyncSession, Depends(get_async_session)],
+        bookmark: BookmarkSerializer,
+):
+    composition_crud = CompositionCRUD(session)
+    return await composition_crud.bookmark_add(composition_id, current_user.id, bookmark.vote)

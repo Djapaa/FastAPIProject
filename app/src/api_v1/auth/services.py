@@ -186,4 +186,4 @@ async def get_current_admin_user(
 ):
     if current_user.is_stuff or current_user.is_superuser:
         return current_user
-    raise HTTPException(status_code=400, detail="Not admin")
+    raise HTTPException(status_code=400, detail="Don't have permissions")
