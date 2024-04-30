@@ -7,7 +7,8 @@ from ...api_v1.auth.services import get_password_hash
 
 
 @pytest.fixture(scope='session')
-async def create_user():
+async def create_verify_user():
+    from .test_auth import mock_redis_set_email_verification_key
     dt = datetime(2024, 1, 1, hour=0,
                   minute=0, second=0, microsecond=0)
     async with test_async_session() as session:
@@ -24,8 +25,9 @@ async def create_user():
         except:
             await session.rollback()
 
+
 @pytest.fixture(scope='session')
-async def create_login_user(create_user):
+async def create_login_user(create_verify_user):
     dt = datetime(2025, 1, 1, hour=0,
                   minute=0, second=0, microsecond=0)
 
@@ -37,3 +39,23 @@ async def create_login_user(create_user):
         )
         session.add(new_user_login_token)
         await session.commit()
+
+@pytest.fixture(scope='session')
+async def create_unverified_user():
+    from .test_auth import mock_redis_set_email_verification_key
+    dt = datetime(2024, 1, 1, hour=0,
+                  minute=0, second=0, microsecond=0)
+    async with test_async_session() as session:
+        new_user = User(
+            username='test3',
+            email='test3@mail.ru',
+            hashed_password=get_password_hash('12345'),
+            is_verified=False,
+            created_at=dt
+        )
+        session.add(new_user)
+        try:
+            await session.commit()
+            await mock_redis_set_email_verification_key('test3@mail.ru', 'test_uuid')
+        except:
+            await session.rollback()

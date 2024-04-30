@@ -1,15 +1,12 @@
 import datetime
-import json
 import uuid
 
 from pydantic import EmailStr
 from httpx import AsyncClient
-from pytest_mock import MockerFixture
-
 from ...api_v1.auth.services import redis_set_email_verification_key, redis_get_email_by_uuid
-from ...api_v1.auth.tasks import send_verification_mail, get_message
+from ...api_v1.auth.tasks import send_verification_mail
 from ...api_v1.auth import services
-from .fixtures import create_user, create_login_user
+from .fixtures import create_verify_user, create_login_user, create_unverified_user
 import pytest
 
 from ...config.redis_conf import test_redis
@@ -185,7 +182,7 @@ def mock_get_token():
 async def test_create_user(
         ac: AsyncClient,
         monkeypatch,
-        create_user,
+        create_verify_user,
         data: dict,
         expected_status: int,
         expected_response
@@ -298,7 +295,7 @@ async def test_create_user(
                          ])
 async def test_login(
         ac: AsyncClient,
-        create_user,
+        create_verify_user,
         monkeypatch,
         data,
         expected_status,
@@ -393,4 +390,44 @@ async def test_logout(
     response = await ac.post('/api/v1/auth/logout/', headers=headers)
     assert response.status_code == expected_status
     if response.status_code != 204:
+        assert response.json() == expected_response
+
+
+@pytest.mark.parametrize('uuid_token, expected_status, expected_response',
+                         [
+
+                             (
+                                     '',
+                                     404,
+                                     {'detail': 'Not Found'}
+                             ),
+                             (
+                                     'test_uuidd',
+                                     400,
+                                     {
+                                         "detail": "verify token is incorrect or expired"
+                                     }
+                             ),
+                             (
+                                     'test_uuid',
+                                     200,
+                                     {}
+                             ),
+
+                         ])
+async def test_user_verify(
+        ac: AsyncClient,
+        create_unverified_user,
+        monkeypatch,
+        uuid_token,
+        expected_status,
+        expected_response
+
+):
+    monkeypatch.setattr(services, 'redis_get_email_by_uuid', mock_redis_get_email_by_uuid)
+
+    path = f'/api/v1/auth/verify/{uuid_token}/'
+    response = await ac.post(path)
+    assert response.status_code == expected_status
+    if response.status_code != 200:
         assert response.json() == expected_response
