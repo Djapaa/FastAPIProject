@@ -1,6 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse
+
 
 from fastapi_filter import FilterDepends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,14 +36,21 @@ async def get_composition(id: int, session: Annotated[AsyncSession, Depends(get_
     return CompositionDetailSerializer.model_validate(composition, from_attributes=True)
 
 
-@router.post('/', status_code=201, dependencies=[Depends(get_current_admin_user)])
+@router.post('/', dependencies=[Depends(get_current_admin_user)])
 async def create_composition(
         session: Annotated[AsyncSession, Depends(get_async_session)],
         composition: CompositionCreateSerializer,
 
 ):
     composition_crud = CompositionCRUD(session)
-    return await composition_crud.create(composition)
+    composition = await composition_crud.create(composition)
+    return JSONResponse(
+        content={
+            'created': True,
+            'id': composition.id
+        },
+        status_code=status.HTTP_201_CREATED
+    )
 
 
 @router.patch('/{id}/', dependencies=[Depends(get_current_admin_user)])
