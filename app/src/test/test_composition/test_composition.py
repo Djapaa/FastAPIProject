@@ -10,11 +10,14 @@ import pytest
                              (
                                      1,
                                      200,
-                                     {'slug': 'testovaya-manga-1', 'title': 'Тестовая манга 1',
+                                     {'slug': 'testovaia-manga-1',
+                                      'title': 'Тестовая манга 1',
                                       'composition_image': 'media/composition/default.png',
-                                      'type': {'id': 2, 'name': 'Манхва'}, 'avg_rating': '0.0',
+                                      'type': {'id': 2, 'name': 'Манхва'},
+                                      'avg_rating': '0.0',
                                       'english_title': 'Test manga 1',
-                                      'another_name_title': 'another name test manga 1', 'year_of_creations': 1990,
+                                      'another_name_title': 'another name test manga 1',
+                                      'year_of_creations': 1990,
                                       'descriptions': 'description test manga 1',
                                       'status': {'id': 1, 'name': 'Продолжается'},
                                       'age_rating': {'id': 2, 'name': '18+'},
@@ -55,7 +58,7 @@ async def test_get_composition(
                                      'api/v1/composition/search/',
                                      200,
                                      [
-                                         {'slug': 'testovaya-manga-5',
+                                         {'slug': 'testovaia-manga-5',
                                           'title': 'Тестовая манга 5',
                                           'composition_image': 'media/composition/default.png',
                                           'type': {
@@ -65,7 +68,7 @@ async def test_get_composition(
                                           'avg_rating': '0.0'
                                           },
                                          {
-                                             'slug': 'testovaya-manga-4',
+                                             'slug': 'testovaia-manga-4',
                                              'title': 'Тестовая манга 4',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -75,7 +78,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-3',
+                                             'slug': 'testovaia-manga-3',
                                              'title': 'Тестовая манга 3',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -85,7 +88,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-2',
+                                             'slug': 'testovaia-manga-2',
                                              'title': 'Тестовая манга 2',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -95,7 +98,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-1',
+                                             'slug': 'testovaia-manga-1',
                                              'title': 'Тестовая манга 1',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -110,7 +113,7 @@ async def test_get_composition(
                                      'api/v1/composition/search/?page=1&page_size=3&order_by=-created_at',
                                      200,
                                      [
-                                         {'slug': 'testovaya-manga-5',
+                                         {'slug': 'testovaia-manga-5',
                                           'title': 'Тестовая манга 5',
                                           'composition_image': 'media/composition/default.png',
                                           'type': {
@@ -120,7 +123,7 @@ async def test_get_composition(
                                           'avg_rating': '0.0'
                                           },
                                          {
-                                             'slug': 'testovaya-manga-4',
+                                             'slug': 'testovaia-manga-4',
                                              'title': 'Тестовая манга 4',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -130,7 +133,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-3',
+                                             'slug': 'testovaia-manga-3',
                                              'title': 'Тестовая манга 3',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -145,7 +148,7 @@ async def test_get_composition(
                                      200,
                                      [
                                          {
-                                             'slug': 'testovaya-manga-2',
+                                             'slug': 'testovaia-manga-2',
                                              'title': 'Тестовая манга 2',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -155,7 +158,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-1',
+                                             'slug': 'testovaia-manga-1',
                                              'title': 'Тестовая манга 1',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -176,7 +179,7 @@ async def test_get_composition(
                                      'api/v1/composition/search/?year_of_creations__gte=2000',
                                      200,
                                      [
-                                         {'slug': 'testovaya-manga-5',
+                                         {'slug': 'testovaia-manga-5',
                                           'title': 'Тестовая манга 5',
                                           'composition_image': 'media/composition/default.png',
                                           'type': {
@@ -186,7 +189,7 @@ async def test_get_composition(
                                           'avg_rating': '0.0'
                                           },
                                          {
-                                             'slug': 'testovaya-manga-4',
+                                             'slug': 'testovaia-manga-4',
                                              'title': 'Тестовая манга 4',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -196,7 +199,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-3',
+                                             'slug': 'testovaia-manga-3',
                                              'title': 'Тестовая манга 3',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -213,7 +216,7 @@ async def test_get_composition(
                                      200,
                                      [
                                          {
-                                             'slug': 'testovaya-manga-2',
+                                             'slug': 'testovaia-manga-2',
                                              'title': 'Тестовая манга 2',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -223,7 +226,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-1',
+                                             'slug': 'testovaia-manga-1',
                                              'title': 'Тестовая манга 1',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -240,7 +243,7 @@ async def test_get_composition(
                                      200,
                                      [
                                          {
-                                             'slug': 'testovaya-manga-3',
+                                             'slug': 'testovaia-manga-3',
                                              'title': 'Тестовая манга 3',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -257,7 +260,7 @@ async def test_get_composition(
                                      200,
                                      [
                                          {
-                                             'slug': 'testovaya-manga-4',
+                                             'slug': 'testovaia-manga-4',
                                              'title': 'Тестовая манга 4',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -267,7 +270,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-3',
+                                             'slug': 'testovaia-manga-3',
                                              'title': 'Тестовая манга 3',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -277,7 +280,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-2',
+                                             'slug': 'testovaia-manga-2',
                                              'title': 'Тестовая манга 2',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -287,7 +290,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-1',
+                                             'slug': 'testovaia-manga-1',
                                              'title': 'Тестовая манга 1',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -310,7 +313,7 @@ async def test_get_composition(
                                      200,
                                      [
                                          {
-                                             'slug': 'testovaya-manga-3',
+                                             'slug': 'testovaia-manga-3',
                                              'title': 'Тестовая манга 3',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -320,7 +323,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-2',
+                                             'slug': 'testovaia-manga-2',
                                              'title': 'Тестовая манга 2',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -330,7 +333,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-1',
+                                             'slug': 'testovaia-manga-1',
                                              'title': 'Тестовая манга 1',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -353,7 +356,7 @@ async def test_get_composition(
                                      200,
                                      [
                                          {
-                                             'slug': 'testovaya-manga-1',
+                                             'slug': 'testovaia-manga-1',
                                              'title': 'Тестовая манга 1',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -376,7 +379,7 @@ async def test_get_composition(
                                      200,
                                      [
                                          {
-                                             'slug': 'testovaya-manga-4',
+                                             'slug': 'testovaia-manga-4',
                                              'title': 'Тестовая манга 4',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -386,7 +389,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-3',
+                                             'slug': 'testovaia-manga-3',
                                              'title': 'Тестовая манга 3',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -396,7 +399,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-2',
+                                             'slug': 'testovaia-manga-2',
                                              'title': 'Тестовая манга 2',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -406,7 +409,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-1',
+                                             'slug': 'testovaia-manga-1',
                                              'title': 'Тестовая манга 1',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -429,7 +432,7 @@ async def test_get_composition(
                                      200,
                                      [
                                          {
-                                             'slug': 'testovaya-manga-4',
+                                             'slug': 'testovaia-manga-4',
                                              'title': 'Тестовая манга 4',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -439,7 +442,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-3',
+                                             'slug': 'testovaia-manga-3',
                                              'title': 'Тестовая манга 3',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -449,7 +452,7 @@ async def test_get_composition(
                                              'avg_rating': '0.0'
                                          },
                                          {
-                                             'slug': 'testovaya-manga-1',
+                                             'slug': 'testovaia-manga-1',
                                              'title': 'Тестовая манга 1',
                                              'composition_image': 'media/composition/default.png',
                                              'type': {
@@ -528,6 +531,28 @@ async def test_composition_search(
                                          "created": True,
                                          "id": 6
                                      }
+                             ),
+                             (
+                                     # Проверка на то что произведение с таким же slug создать нельзя (slug береться от поля title)
+                                     {
+                                         "title": "Тестовая манга 1",
+                                         "english_title": "Test manga 123",
+                                         "another_name_title": "123 manga Test",
+                                         "year_of_creations": 2001,
+                                         "descriptions": "Test manga 123 description",
+                                         "status": 1,
+                                         "type": 1,
+                                         "age_rating": 1,
+                                         "genres": [
+                                             1, 2, 3
+                                         ],
+                                         "tags": [
+                                             3, 4, 5
+                                         ]
+                                     },
+                                     {'Authorization': 'Bearer admin_token'},
+                                     400,
+                                     {'detail': 'composition already exists'}
                              ),
                              (  # Проверка на то, что неавторизованный пользователь не может создавать произведения
                                      {
@@ -727,3 +752,181 @@ async def test_composition_create(
     response = await ac.post('/api/v1/composition/', json=data, headers=headers)
     assert response.status_code == expected_status
     assert response.json() == expected_response
+
+
+@pytest.mark.parametrize('composition_id, data, headers, expected_status, expected_response',
+                         [
+                             (
+                                     # Проверка на то, что все поля можно обновить
+                                     1,
+                                     {
+                                         "title": "Тестовая манга 111",
+                                         "english_title": "Тестовая манга 111",
+                                         "another_name_title": "111 Тестовая манга",
+                                         "year_of_creations": 1988,
+                                         "descriptions": "Тестовая манга 111 description",
+                                         "status": 3,
+                                         "type": 3,
+                                         "age_rating": 3,
+                                         "genres": [
+                                             1, 2, 3
+                                         ],
+                                         "tags": [
+                                             3, 4, 5
+                                         ]
+                                     },
+                                     {'Authorization': 'Bearer admin_token'},
+                                     200,
+                                     {
+                                         'age_rating':
+                                             {
+                                                 'id': 2,
+                                                 'name': '18+',
+                                             },
+                                         'age_rating_id': 3,
+                                         'another_name_title': '111 Тестовая манга',
+                                         'avg_rating': 0.0,
+                                         'composition_genres': [
+                                             {
+                                                 'id': 1,
+                                                 'name': 'Боевые искусства',
+                                             },
+                                             {
+                                                 'id': 2,
+                                                 'name': 'Сёнен',
+                                             },
+                                         ],
+                                         'composition_image': 'media/composition/default.png',
+                                         'composition_tags': [
+                                             {
+                                                 'id': 1,
+                                                 'name': 'Веб',
+
+                                             },
+
+                                             {
+                                                 'id': 2,
+                                                 'name': 'ГГ имба',
+                                             },
+                                             {
+                                                 'id': 5,
+                                                 'name': 'Система',
+                                             },
+                                         ],
+                                         'count_bookmarks': 0,
+                                         'count_rating': 0,
+                                         'created_at': '2024-01-01T00:00:00',
+                                         'descriptions': 'Тестовая манга 111 description',
+                                         'english_title': 'Тестовая манга 111',
+                                         'id': 1,
+                                         'slug': 'testovaia-manga-111',
+                                         'status': {
+                                             'id': 1,
+                                             'name': 'Продолжается',
+                                         },
+                                         'status_id': 3,
+                                         'title': 'Тестовая манга 111',
+                                         'total_votes': 0,
+                                         'type': {
+                                             'id': 2,
+                                             'name': 'Манхва',
+                                         },
+                                         'type_id': 3,
+                                         'updated_at': '2024-05-01T11:23:47.991335',
+                                         'view': 0,
+                                         'year_of_creations': 1988,
+                                     }
+                             ),
+                             (
+                                     # Проверка на то, что часть полей можно обновить
+                                     2,
+                                     {
+                                         'descriptions': 'Тестовая манга 222 description',
+                                         "status": 2,
+                                         "composition_tags": [
+                                             1, 2, 6
+                                         ]
+                                     },
+                                     {'Authorization': 'Bearer admin_token'},
+                                     200,
+                                     {
+                                         'updated_at': '2024-05-01T12:04:41.610690',
+                                         'age_rating_id': 3,
+                                         'descriptions': 'Тестовая манга 222 description',
+                                         'type_id': 1,
+                                         'title': 'Тестовая манга 2',
+                                         'composition_image': 'media/composition/default.png',
+                                         'status_id': 2,
+                                         'slug': 'testovaia-manga-2',
+                                         'view': 0,
+                                         'id': 2,
+                                         'english_title': 'Test manga 2',
+                                         'count_rating': 0,
+                                         'another_name_title': 'another name test manga 2',
+                                         'avg_rating': 0.0,
+                                         'year_of_creations': 1992, 'count_bookmarks': 0,
+                                         'created_at': '2024-02-22T00:00:00',
+                                         'total_votes': 0,
+                                         'age_rating': {
+                                             'name': 'Для всех',
+                                             'id': 3
+
+                                         },
+                                         'type': {
+                                             'name': 'Манга',
+                                             'id': 1
+                                         },
+                                         'status': {
+                                             'id': 1,
+                                             'name': 'Продолжается'
+                                         },
+                                         'composition_genres': [
+                                             {
+                                                 'id': 3,
+                                                 'name': 'Романтика'
+                                             },
+                                             {
+                                                 'id': 5,
+                                                 'name': 'Сёдзе'
+                                             }
+                                         ],
+                                         'composition_tags': [
+                                             {
+                                                 'name': 'Веб',
+                                                 'id': 1
+                                             },
+                                             {
+                                                 'name': 'ГГ имба',
+                                                 'id': 2
+                                             },
+                                             {
+                                                 'name': 'Кулинария',
+                                                 'id': 6
+                                             }
+                                         ]
+                                     }
+                             ),
+
+                         ])
+async def test_composition_update(
+        ac: AsyncClient,
+        create_test_compositions,
+        create_user_and_login_token,
+        create_admin_user_and_login_token,
+        composition_id,
+        data,
+        headers,
+        expected_status,
+        expected_response,
+
+):
+    path = f'/api/v1/composition/{composition_id}/'
+    response = await ac.patch(path, json=data, headers=headers)
+    assert response.status_code == expected_status
+    response_json = response.json()
+    if response.status_code == 200:
+        response_updated_at = response_json.pop('updated_at')
+        expected_updated_at = expected_response.pop('updated_at')
+        assert response_json.get('created_at') != response_updated_at
+    assert response_json == expected_response
+

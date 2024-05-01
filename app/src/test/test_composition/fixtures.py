@@ -96,7 +96,7 @@ async def create_test_compositions(
 
     datas = [
         {
-            'slug': 'testovaya-manga-1',
+            'slug': 'testovaia-manga-1',
             'title': 'Тестовая манга 1',
             'english_title': 'Test manga 1',
             'another_name_title': 'another name test manga 1',
@@ -118,7 +118,7 @@ async def create_test_compositions(
             ]
         },
         {
-            'slug': 'testovaya-manga-2',
+            'slug': 'testovaia-manga-2',
             'title': 'Тестовая манга 2',
             'english_title': 'Test manga 2',
             'another_name_title': 'another name test manga 2',
@@ -139,7 +139,7 @@ async def create_test_compositions(
             ]
         },
         {
-            'slug': 'testovaya-manga-3',
+            'slug': 'testovaia-manga-3',
             'title': 'Тестовая манга 3',
             'english_title': 'Test manga 3',
             'another_name_title': 'another name test manga 3',
@@ -162,7 +162,7 @@ async def create_test_compositions(
             ]
         },
         {
-            'slug': 'testovaya-manga-4',
+            'slug': 'testovaia-manga-4',
             'title': 'Тестовая манга 4',
             'english_title': 'Test manga 4',
             'another_name_title': 'another name test manga 4',
@@ -183,7 +183,7 @@ async def create_test_compositions(
             ]
         },
         {
-            'slug': 'testovaya-manga-5',
+            'slug': 'testovaia-manga-5',
             'title': 'Тестовая манга 5',
             'english_title': 'Test manga 5',
             'another_name_title': 'another name test manga 5',
