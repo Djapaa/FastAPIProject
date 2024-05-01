@@ -6,7 +6,7 @@ from httpx import AsyncClient
 from ...api_v1.auth.services import redis_set_email_verification_key, redis_get_email_by_uuid
 from ...api_v1.auth.tasks import send_verification_mail
 from ...api_v1.auth import services
-from .fixtures import create_verify_user, create_login_token_for_verify_user, create_unverified_user
+from .fixtures import create_verify_user, create_user_and_login_token, create_unverified_user
 import pytest
 
 from ...config.redis_conf import test_redis
@@ -346,7 +346,7 @@ async def test_login(
                          ])
 async def test_current_user(
         ac: AsyncClient,
-        create_login_token_for_verify_user,
+        create_user_and_login_token,
         headers,
         expected_status,
         expected_response
@@ -382,7 +382,7 @@ async def test_current_user(
                          ])
 async def test_logout(
         ac: AsyncClient,
-        create_login_token_for_verify_user,
+        create_user_and_login_token,
         headers,
         expected_status,
         expected_response
