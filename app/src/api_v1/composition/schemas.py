@@ -32,7 +32,7 @@ class CompositionGenreSerializer(CompositionAdditionalInfo):
 
 
 class CompositionCreateSerializer(BaseModel):
-    title: str
+    title: str = Field(min_length=4)
     english_title: str
     another_name_title: str
     year_of_creations: int = Field(ge=1980)
