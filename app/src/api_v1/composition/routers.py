@@ -23,7 +23,6 @@ async def get_filtered_list_of_composition(
         composition_filter: Annotated[CompositionFilter, FilterDepends(CompositionFilter)]
 ):
     composition_crud = CompositionCRUD(session)
-    print(composition_filter)
     compositions = await composition_crud.get_paginate_and_filtered_list(paginator, composition_filter)
     return [CompositionListSerializer.model_validate(composition, from_attributes=True) for composition in compositions]
 
@@ -63,8 +62,6 @@ async def composition_rating_add_or_update(
         session: Annotated[AsyncSession, Depends(get_async_session)],
         rating: RatingSerializer,
 ):
-    print(rating.vote)
-    print(100 * '1')
     composition_crud = CompositionCRUD(session)
     return await composition_crud.rating_add(composition_id, current_user.id, rating.vote)
 
