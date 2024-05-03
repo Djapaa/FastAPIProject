@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 import aiofiles
 
+from ..config.model import Model
 from ..config.settings import settings
 
 
