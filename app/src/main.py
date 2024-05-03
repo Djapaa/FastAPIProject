@@ -12,6 +12,7 @@ from .api_v1.composition.routers import router as composition_router
 from .api_v1.comment.router import router as comment_router
 from .api_v1.likedislike.routers import router as like_dislike_router
 from .api_v1.chapter.routers import router as chapter_router
+from .api_v1.account.router import router as account_router
 
 app = FastAPI()
 admin = Admin(app, engine)
@@ -27,6 +28,8 @@ router.include_router(prefix='/comment', tags=['Comment'], router=comment_router
 router.include_router(prefix='/vote', tags=['Vote'], router=like_dislike_router)
 
 router.include_router(prefix='/composition', tags=['Chapter'], router=chapter_router)
+
+router.include_router(prefix='/account', tags=['Account'], router=account_router)
 
 app.include_router(router=router)
 
