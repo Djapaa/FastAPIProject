@@ -11,11 +11,6 @@ from .models import GenderEnum
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
 
-class UserSerializer(BaseModel):
-    username: Annotated[str | EmailStr, Field(min_length=4, max_length=100)]
-    password: Annotated[str, Field(min_length=4, max_length=100)]
-
-
 class UserCreateSerializer(BaseModel):
     username: Annotated[str, Field(min_length=4, max_length=100)]
     email: Annotated[EmailStr, Field(min_length=4, max_length=100)]
@@ -37,5 +32,3 @@ class UserInfoSerializer(BaseModel):
     avatar: str
 
 
-# class UserInDBSerializer(UserCreateSerializer):
-#     hashed_password: str
