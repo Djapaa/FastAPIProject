@@ -9,7 +9,7 @@ from starlette import status
 from .models import Composition, CompositionGenre, CompositionTag, CompositionStatus, CompositionType, \
     CompositionsAgeRating, UserCompositionRelation
 from .schemas import CompositionCreateSerializer, Paginator, CompositionUpdateSerializer
-from ..general_services import check_obj_in_db, get_or_create
+from ..general_services import get_object, get_or_create
 
 
 class CompositionCRUD:
@@ -70,20 +70,20 @@ class CompositionCRUD:
         composition_obj.descriptions = composition.descriptions
         composition_obj.year_of_creations = composition.year_of_creations
 
-        new_status = await check_obj_in_db(self.session, composition.status, CompositionStatus)
+        new_status = await get_object(self.session, composition.status, CompositionStatus)
         composition_obj.status_id = new_status.id
 
-        new_type = await check_obj_in_db(self.session, composition.type, CompositionType)
+        new_type = await get_object(self.session, composition.type, CompositionType)
         composition_obj.type_id = new_type.id
 
-        new_agerating = await check_obj_in_db(self.session, composition.age_rating, CompositionsAgeRating)
+        new_agerating = await get_object(self.session, composition.age_rating, CompositionsAgeRating)
         composition_obj.age_rating_id = new_agerating.id
 
-        new_genres = [await check_obj_in_db(self.session, genre, CompositionGenre)
+        new_genres = [await get_object(self.session, genre, CompositionGenre)
                       for genre in composition.genres]
         composition_obj.composition_genres = new_genres
 
-        new_tags = [await check_obj_in_db(self.session, tag, CompositionTag)
+        new_tags = [await get_object(self.session, tag, CompositionTag)
                     for tag in composition.tags]
         composition_obj.composition_tags = new_tags
 
@@ -113,23 +113,23 @@ class CompositionCRUD:
         composition_obj.year_of_creations = composition.year_of_creations or composition_obj.year_of_creations
 
         if composition.status:
-            new_status = await check_obj_in_db(self.session, composition.status, CompositionStatus)
+            new_status = await get_object(self.session, composition.status, CompositionStatus)
             composition_obj.status_id = new_status.id
 
         if composition.type:
-            new_type = await check_obj_in_db(self.session, composition.type, CompositionType)
+            new_type = await get_object(self.session, composition.type, CompositionType)
             composition_obj.type_id = new_type.id
         if composition.age_rating:
-            new_agerating = await check_obj_in_db(self.session, composition.age_rating, CompositionsAgeRating)
+            new_agerating = await get_object(self.session, composition.age_rating, CompositionsAgeRating)
             composition_obj.age_rating_id = new_agerating.id
 
         if composition.composition_genres:
-            new_genres = [await check_obj_in_db(self.session, genre, CompositionGenre)
+            new_genres = [await get_object(self.session, genre, CompositionGenre)
                           for genre in composition.composition_genres]
             composition_obj.composition_genres = new_genres
 
         if composition.composition_tags:
-            new_tags = [await check_obj_in_db(self.session, tag, CompositionTag)
+            new_tags = [await get_object(self.session, tag, CompositionTag)
                         for tag in composition.composition_tags]
             composition_obj.composition_tags = new_tags
 

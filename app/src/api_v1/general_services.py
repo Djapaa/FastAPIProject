@@ -9,7 +9,7 @@ import aiofiles
 from ..config.settings import settings
 
 
-async def check_obj_in_db(session: AsyncSession, obj_id: int, model: Type['Model']):
+async def get_object(session: AsyncSession, obj_id: int, model: Type['Model']):
     query = (
         select(model)
         .filter(model.id == obj_id)

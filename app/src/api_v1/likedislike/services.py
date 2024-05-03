@@ -6,7 +6,7 @@ from sqlalchemy import select, func, cast, Integer
 from sqlalchemy.orm import contains_eager, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..composition.services import check_obj_in_db
+from ..composition.services import get_object
 from .models import LikeDislike
 from ..auth.models import Model
 
@@ -45,7 +45,7 @@ class VoteCRUD:
         """
 
         vote_type = 1 if vote_type else -1
-        await check_obj_in_db(self.session, voted_obj_id, voted_model)
+        await get_object(self.session, voted_obj_id, voted_model)
         #Создание словаря для дальнейшего его использования при добавлении
         #К примеру chapter_id: id или comment_id: id
         obj_id = {f'{voted_model.__name__.lower()}_id': voted_obj_id}

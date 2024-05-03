@@ -15,7 +15,7 @@ from ..auth.models import User
 
 from ..auth.services import get_user_by_token
 from ..composition.models import Composition
-from ..general_services import check_obj_in_db, upload_image
+from ..general_services import get_object, upload_image
 
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 
@@ -26,7 +26,7 @@ class ChapterCRUD:
         self.model = Chapter
 
     async def create(self, create_serializer: CreateSchemaType, composition_id: int):
-        await check_obj_in_db(self.session, composition_id, Composition)
+        await get_object(self.session, composition_id, Composition)
         instance = self.model(**create_serializer.dict(), composition_id=composition_id)
         self.session.add(instance)
         try:
@@ -37,7 +37,7 @@ class ChapterCRUD:
         return instance
 
     async def create_pages(self, files: list[UploadFile], chapter_id: int):
-        await check_obj_in_db(self.session, chapter_id, self.model)
+        await get_object(self.session, chapter_id, self.model)
         chapter_instance = await self.get(chapter_id)
         for new_files, current_files in zip_longest(enumerate(files, 1), chapter_instance.pages):
             if new_files and not current_files:
@@ -91,7 +91,7 @@ class ChapterCRUD:
         return chapter_instance
 
     async def get(self, chapter_id: int):
-        await check_obj_in_db(self.session, chapter_id, self.model)
+        await get_object(self.session, chapter_id, self.model)
         query = (
             select(self.model)
             .options(
