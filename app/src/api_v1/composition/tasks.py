@@ -54,8 +54,3 @@ def calculate_bookmarks_ratings_votes():
     return loop.run_until_complete(calculate_bookmarks_ratings_votes_task())
 
 
-
-    # async with get_async_session() as session:
-    #     composition = await session.execute(query)
-    #     composition = composition.mappings().all()
-
