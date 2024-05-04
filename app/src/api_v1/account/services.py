@@ -1,5 +1,5 @@
 
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -8,13 +8,22 @@ from starlette import status
 
 from .schemas import UserPartialUpdateSerializer
 from ..auth.models import User
-from ..general_services import get_object
+from ..general_services import get_object, upload_image
 
 
 class UserCRUD:
     def __init__(self, session: AsyncSession):
         self.session = session
 
+
+    async def _get_user_and_check_permissions(self, user_id: int, current_user: User) -> User:
+        target_user = await get_object(self.session, user_id, User)
+        if not check_user_permissions(current_user, target_user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='dont have permission'
+            )
+        return target_user
     async def get(self, user_id: int):
         subq = (
             select(
@@ -63,12 +72,8 @@ class UserCRUD:
         return instance_mapping
 
     async def partial_update(self, user_id, updated_data: UserPartialUpdateSerializer, current_user: User):
-        target_user = await get_object(self.session, user_id, User)
-        if not check_user_permissions(current_user, target_user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='dont have permission'
-            )
+        target_user = await self._get_user_and_check_permissions(user_id, current_user)
+
         target_user.username = updated_data.username or target_user.username
         target_user.gender = updated_data.gender or target_user.gender
         target_user.email_not = updated_data.email_not or target_user.email_not
@@ -82,6 +87,16 @@ class UserCRUD:
                 detail='User with such username already exists'
             )
         return await self.get(user_id)
+
+    async def update_avatar(self, user_id, file: UploadFile, current_user: User):
+        target_user = await self._get_user_and_check_permissions(user_id, current_user)
+        dest = await upload_image(file, f'avatar/{target_user.id}/')
+        target_user.avatar = dest
+        self.session.add(target_user)
+        await self.session.commit()
+        return await self.get(user_id)
+
+
 
 
 def check_user_permissions(current_user: User, target_user: User):
