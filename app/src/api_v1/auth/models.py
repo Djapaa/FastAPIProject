@@ -8,9 +8,11 @@ from typing import TYPE_CHECKING
 from ...config.model import Model
 
 from ..likedislike.models import LikeDislike
+from ..notification.models import UserNotification
 
 if TYPE_CHECKING:
     from ..composition.models import Composition, UserCompositionRelation
+
 
 
 
@@ -53,6 +55,8 @@ class User(Model):
     )
 
     voted: Mapped[list['LikeDislike']] = relationship(back_populates='user')
+
+    notification: Mapped[list['UserNotification']] = relationship(back_populates='user')
 
 
 class Token(Model):
