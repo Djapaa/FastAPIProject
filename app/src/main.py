@@ -9,7 +9,7 @@ from .config.database import engine
 from .api_v1.auth.models import *
 from .api_v1.auth.routers import router as auth_router
 from .api_v1.composition.routers import router as composition_router
-from .api_v1.comment.router import router as comment_router
+from .api_v1.comment.routers import router as comment_router
 from .api_v1.likedislike.routers import router as like_dislike_router
 from .api_v1.chapter.routers import router as chapter_router
 from .api_v1.account.router import router as account_router
