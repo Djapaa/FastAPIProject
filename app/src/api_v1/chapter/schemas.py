@@ -1,6 +1,5 @@
 from datetime import datetime
-from typing import Annotated
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 class Publish(BaseModel):
     publish: bool

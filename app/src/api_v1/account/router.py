@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .services import UserCRUD
 from .schemas import UserPartialUpdateSerializer
 from ..auth.models import User
-from ..auth.schemas import UserInfoSerializer
 from ..auth.services import get_current_user
 from ...config.database import get_async_session
 

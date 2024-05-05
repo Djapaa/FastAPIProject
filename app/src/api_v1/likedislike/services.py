@@ -1,9 +1,8 @@
 from typing import TypeVar, Type
 from pydantic import BaseModel
-from fastapi import HTTPException, Request
+from fastapi import HTTPException
 from starlette import status
-from sqlalchemy import select, func, cast, Integer
-from sqlalchemy.orm import contains_eager, joinedload
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..composition.services import get_object

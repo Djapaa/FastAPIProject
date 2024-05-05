@@ -1,10 +1,7 @@
-import json
 from decimal import Decimal
-from typing import Any, Annotated, Optional
+from typing import Annotated, Optional
 from slugify import slugify
-from pydantic import BaseModel, Field, field_validator, computed_field, model_validator
-from sqlalchemy import Numeric
-
+from pydantic import BaseModel, Field, computed_field
 
 class CompositionAdditionalInfo(BaseModel):
     id: int

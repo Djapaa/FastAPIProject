@@ -1,9 +1,9 @@
-import uuid
+
 from typing import Annotated
 
 from fastapi.responses import JSONResponse
-from fastapi import APIRouter, HTTPException, Depends, Response
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, Response
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 

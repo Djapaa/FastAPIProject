@@ -2,7 +2,7 @@ from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends
 
-from .schemas import VoteChapterSerializer, VoteCommentSerializer
+from .schemas import VoteChapterSerializer
 from .services import VoteCRUD
 from ..auth.schemas import UserInfoSerializer
 from ..auth.services import get_current_user
