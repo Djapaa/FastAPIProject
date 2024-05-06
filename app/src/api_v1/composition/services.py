@@ -9,7 +9,9 @@ from starlette import status
 from .models import Composition, CompositionGenre, CompositionTag, CompositionStatus, CompositionType, \
     CompositionsAgeRating, UserCompositionRelation
 from .schemas import CompositionCreateSerializer, Paginator, CompositionUpdateSerializer
+from ..auth.models import User
 from ..general_services import get_object, get_or_create
+from ...config.database import async_session
 
 
 class CompositionCRUD:
@@ -174,3 +176,31 @@ class CompositionCRUD:
             vote: int
     ):
         return await self._user_relation_add(composition_id, user_id, vote, 'bookmark')
+
+
+async def get_composition_readers(composition_id: int):
+    async with async_session() as session:
+        query = (
+
+            select(
+                User
+            )
+            .distinct()
+            .select_from(
+                User
+            )
+            .join(
+                UserCompositionRelation
+            )
+            .options(
+                selectinload(
+                    User.evaluated_and_bookmark_compositions
+                )
+            )
+            .filter(
+                Composition.id == composition_id,
+                UserCompositionRelation.bookmark != None
+            )
+        )
+        chapter_instance = await session.scalars(query)
+        return chapter_instance.all()

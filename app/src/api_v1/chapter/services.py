@@ -7,14 +7,14 @@ from sqlalchemy.exc import IntegrityError
 from typing import TypeVar, Optional
 from pydantic import BaseModel
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload
 from itertools import zip_longest
 
 from .models import Page, Chapter
 from ..auth.models import User
 
 from ..auth.services import get_user_by_token
-from ..composition.models import Composition, UserCompositionRelation
+from ..composition.models import Composition
 from ..general_services import get_object, upload_image
 
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
@@ -66,7 +66,7 @@ class ChapterCRUD:
             опубликовать или отменить публикацию, время публикации устанавливается после первой публикации
         """
         instance = await self.get(chapter_id)
-        if instance.is_published:
+        if instance.is_published and publish:
             raise HTTPException(
                 detail='Chapter already published',
                 status_code=status.HTTP_400_BAD_REQUEST
