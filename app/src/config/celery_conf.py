@@ -13,7 +13,8 @@ celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", settings.CELERY_BRO
 celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", settings.CELERY_RESULT_BACKEND)
 celery.autodiscover_tasks([
     'src.api_v1.auth',
-    'src.api_v1.composition'
+    'src.api_v1.composition',
+    'src.api_v1.notification',
 ])
 
 
