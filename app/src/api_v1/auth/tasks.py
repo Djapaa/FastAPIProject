@@ -1,5 +1,6 @@
 import smtplib
 from email.message import EmailMessage
+
 from ...config.settings import settings
 from celery import shared_task
 
@@ -31,4 +32,3 @@ def send_verification_mail(username, email, verify_uuid):
     with smtplib.SMTP_SSL(settings.MAIL_HOST, settings.MAIL_PORT) as server:
         server.login(settings.MAIL_USERNAME, settings.MAIL_PASSWORD)
         server.send_message(message)
-
