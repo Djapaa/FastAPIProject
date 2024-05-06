@@ -66,6 +66,12 @@ class ChapterCRUD:
             опубликовать или отменить публикацию, время публикации устанавливается после первой публикации
         """
         instance = await self.get(chapter_id)
+        if instance.is_published:
+            raise HTTPException(
+                detail='Chapter already published',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
         if not instance.is_published and publish and not instance.pub_date:
             instance.is_published = True
             if not instance.pub_date:
@@ -90,7 +96,6 @@ class ChapterCRUD:
         return chapter_instance
 
     async def get(self, chapter_id: int):
-        await get_object(self.session, chapter_id, Chapter)
         query = (
             select(Chapter)
             .options(
@@ -100,9 +105,15 @@ class ChapterCRUD:
             .filter(Chapter.id == chapter_id)
 
         )
-        chapter_instance = await self.session.execute(query)
-        return chapter_instance.scalar()
+        chapter_instance = await self.session.scalar(query)
+        if chapter_instance is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail={
+                                    f'detail': f'Chapter not found'
+                                }
+                                )
 
+        return chapter_instance
 
 
 async def get_current_user_for_chapter_crud(request: Request, session):
