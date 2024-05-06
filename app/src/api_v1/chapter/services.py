@@ -7,14 +7,14 @@ from sqlalchemy.exc import IntegrityError
 from typing import TypeVar, Optional
 from pydantic import BaseModel
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from itertools import zip_longest
 
 from .models import Page, Chapter
 from ..auth.models import User
 
 from ..auth.services import get_user_by_token
-from ..composition.models import Composition
+from ..composition.models import Composition, UserCompositionRelation
 from ..general_services import get_object, upload_image
 
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
@@ -23,11 +23,10 @@ CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 class ChapterCRUD:
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.model = Chapter
 
     async def create(self, create_serializer: CreateSchemaType, composition_id: int):
         await get_object(self.session, composition_id, Composition)
-        instance = self.model(**create_serializer.dict(), composition_id=composition_id)
+        instance = Chapter(**create_serializer.dict(), composition_id=composition_id)
         self.session.add(instance)
         try:
             await self.session.commit()
@@ -37,7 +36,7 @@ class ChapterCRUD:
         return instance
 
     async def create_pages(self, files: list[UploadFile], chapter_id: int):
-        await get_object(self.session, chapter_id, self.model)
+        await get_object(self.session, chapter_id, Chapter)
         chapter_instance = await self.get(chapter_id)
         for new_files, current_files in zip_longest(enumerate(files, 1), chapter_instance.pages):
             if new_files and not current_files:
@@ -91,24 +90,25 @@ class ChapterCRUD:
         return chapter_instance
 
     async def get(self, chapter_id: int):
-        await get_object(self.session, chapter_id, self.model)
+        await get_object(self.session, chapter_id, Chapter)
         query = (
-            select(self.model)
+            select(Chapter)
             .options(
-                joinedload(self.model.pages)
+                joinedload(Chapter.pages),
+                joinedload(Chapter.composition)
             )
-            .filter(self.model.id == chapter_id)
+            .filter(Chapter.id == chapter_id)
 
         )
         chapter_instance = await self.session.execute(query)
         return chapter_instance.scalar()
 
 
+
 async def get_current_user_for_chapter_crud(request: Request, session):
     header_auth = request.headers.get('Authorization', None)
     if not header_auth:
         return None
-
     prefix, token = header_auth.split()
     if prefix != 'Bearer':
         return None
