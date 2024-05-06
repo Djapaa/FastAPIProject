@@ -9,7 +9,7 @@ class PageCreateSerializer(BaseModel):
 
 
 class ChapterCreateSerializer(BaseModel):
-    name: str
+    name: str | None
     number: int
 
 
