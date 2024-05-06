@@ -45,18 +45,17 @@ class Composition(Model):
                                                                     secondary='composition_tag_relation'
                                                                     )
 
-    # readers: Mapped[list['User']] = relationship(back_populates='evaluated_and_bookmark_compositions',
-    #                                              secondary='user_composition_relation'
-    #                                              )
+    readers: Mapped[list['User']] = relationship(
+        back_populates='evaluated_and_bookmark_compositions',
+        secondary='user_composition_relation',
+        viewonly=True
+    )
+
     rating_and_bookmark: Mapped[list['UserCompositionRelation']] = relationship(
         back_populates='composition'
     )
 
     chapters: Mapped[list['Chapter']] = relationship(back_populates='composition')
-
-
-
-
 
 
 class CompositionsAgeRating(Model):
@@ -111,7 +110,6 @@ class CompositionTag(Model):
     tag_compositions: Mapped[list['Composition']] = relationship(back_populates='composition_tags',
                                                                  secondary='composition_tag_relation'
                                                                  )
-
 
 
 class UserCompositionRelation(Model):

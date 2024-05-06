@@ -1,7 +1,6 @@
 import enum
 from datetime import datetime
 
-
 from sqlalchemy import String, Numeric, text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import TYPE_CHECKING
@@ -12,8 +11,6 @@ from ..notification.models import UserNotification
 
 if TYPE_CHECKING:
     from ..composition.models import Composition, UserCompositionRelation
-
-
 
 
 class GenderEnum(str, enum.Enum):
@@ -47,9 +44,12 @@ class User(Model):
 
     tokens: Mapped[list['Token']] = relationship(back_populates="user")
 
-    # evaluated_and_bookmark_compositions: Mapped[list["Composition"]] = relationship(back_populates='readers',
-    #                                                                                secondary='user_composition_relation'
-    #                                                                                )
+    evaluated_and_bookmark_compositions: Mapped[list['Composition']] = relationship(
+        back_populates='readers',
+        secondary='user_composition_relation',
+        viewonly=True
+    )
+
     rating_and_bookmark: Mapped[list['UserCompositionRelation']] = relationship(
         back_populates='user'
     )
